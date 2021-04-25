@@ -1,0 +1,4 @@
+amazon:
+  partnerTag: "AMAZON_PARTNER_TAG"
+  accessKey: "AMAZON_ACCESS_KEY"
+  secretKey: "AMAZON_SECRET_KEY"

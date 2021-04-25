@@ -1,0 +1,59 @@
+[
+    {
+        "Ancestor": {
+            "Ancestor": {
+                "Ancestor": {
+                    "Ancestor": {
+                        "ContextFreeName": "Elektro-Großgeräte",
+                        "DisplayName": "Elektro-Großgeräte",
+                        "Id": "908823031"
+                    },
+                    "ContextFreeName": "Elektro-Großgeräte",
+                    "DisplayName": "Kategorien",
+                    "Id": "908824031"
+                },
+                "ContextFreeName": "Zubehör für Elektro-Großgeräte",
+                "DisplayName": "Zubehör",
+                "Id": "265854011"
+            },
+            "ContextFreeName": "Kühlschrankzubehör",
+            "DisplayName": "Kühlschrankzubehör",
+            "Id": "340695031"
+        },
+        "ContextFreeName": "Wasserfilter für Kühlschränke",
+        "DisplayName": "Wasserfilter",
+        "Id": "340893031",
+        "IsRoot": false
+    },
+    {
+        "Ancestor": {
+            "Ancestor": {
+                "Ancestor": {
+                    "Ancestor": {
+                        "Ancestor": {
+                            "ContextFreeName": "Bekleidung",
+                            "DisplayName": "Bekleidung",
+                            "Id": "77028031"
+                        },
+                        "ContextFreeName": "Bekleidung",
+                        "DisplayName": "Kategorien",
+                        "Id": "78689031"
+                    },
+                    "ContextFreeName": "Babybekleidung",
+                    "DisplayName": "Baby",
+                    "Id": "1981001031"
+                },
+                "ContextFreeName": "Babybekleidung für Jungen",
+                "DisplayName": "Jungen (0 -24 Monate)",
+                "Id": "1981002031"
+            },
+            "ContextFreeName": "Accessoires für Baby-Jungen",
+            "DisplayName": "Accessoires",
+            "Id": "1981003031"
+        },
+        "ContextFreeName": "Handschuhe & Fäustlinge für Baby-Jungen",
+        "DisplayName": "Handschuhe & Fäustlinge",
+        "Id": "1981004031",
+        "IsRoot": false
+    }
+]

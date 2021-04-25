@@ -1,0 +1,7 @@
+amazon:
+  partnerTag: null
+  partnerType: Associates
+  accessKey: null
+  secretKey: null
+  host: webservices.amazon.de
+  region: eu-west-1

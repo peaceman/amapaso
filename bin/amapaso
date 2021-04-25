@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+require('dotenv').config()
+
+const config = require('config');
+const Bottleneck = require('bottleneck');
+
+const log = require('../src/log');
+const { ApiClient } = require('../src/amazon/api');
+const CategoryImport = require('../src/amazon/category-import');
+
+(async () => {
+    const limiter = new Bottleneck({
+        minTime: 2000,
+    });
+
+    const apiClient = new ApiClient({
+        accessKey: config.get('amazon.accessKey'),
+        secretKey: config.get('amazon.secretKey'),
+        host: config.get('amazon.host'),
+        region: config.get('amazon.region'),
+        partnerTag: config.get('amazon.partnerTag'),
+        partnerType: config.get('amazon.partnerType'),
+    }, limiter);
+
+    const rootNodeIds = ['77028031'];
+    await CategoryImport.fetchAndStoreNodeHierarchy(
+        apiClient,
+        category => log.info('storing category', {category}),
+        rootNodeIds
+    );
+
+})();
