@@ -52,7 +52,7 @@ async function fetchAndStoreNodeHierarchy(apiClient, storeCategory, rootNodeIds)
     const browseNodesLimit = apiClient.getBrowseNodesLimit();
     const visitedNodeIds = new Map();
 
-    async function fetchAndStore(nodeIds, parentId = undefined) {
+    async function fetchAndStore(nodeIds, rootId = undefined, parentId = undefined) {
         // prevent argument mutation
         nodeIds = nodeIds.slice();
         // prevent duplicate fetches of node information
@@ -76,35 +76,48 @@ async function fetchAndStoreNodeHierarchy(apiClient, storeCategory, rootNodeIds)
             for (const parentNode of browseNodes) {
                 // store the parent node only if it has no parent, parents will store their childs
                 if (!parentId) {
-                    await storeCategory(convertBrowseNodeToCategory(parentNode, parentId));
+                    await storeCategory(convertBrowseNodeToCategory(
+                        parentNode,
+                        parentNode['Id'],
+                        parentId
+                    ));
                 }
 
                 const childs = parentNode['Children'] || [];
                 for (const child of childs) {
-                    await storeCategory(convertBrowseNodeToCategory(child, parentNode['Id']));
+                    await storeCategory(convertBrowseNodeToCategory(
+                        child,
+                        rootId ?? parentNode['Id'],
+                        parentNode['Id']
+                    ));
                 }
 
                 const childIds = childs.map(n => n['Id']);
-                newFetchTasks.push({parentId: parentNode['Id'], childIds});
+                newFetchTasks.push({
+                    rootId: rootId ?? parentNode['Id'],
+                    parentId: parentNode['Id'],
+                    childIds
+                });
             }
         }
 
         return newFetchTasks;
     }
 
-    let fetchTasks = [{parentId: undefined, childIds: rootNodeIds}];
+    let fetchTasks = [{parentId: undefined, rootId: undefined, childIds: rootNodeIds}];
     while (fetchTasks.length) {
         const task = fetchTasks.shift();
-        const newTasks = await fetchAndStore(task.childIds, task.parentId);
+        const newTasks = await fetchAndStore(task.childIds, task.rootId, task.parentId);
 
         fetchTasks.push(...newTasks);
     }
 }
 
-function convertBrowseNodeToCategory(browseNode, parentId = undefined) {
+function convertBrowseNodeToCategory(browseNode, rootId, parentId = undefined) {
     return {
         id: browseNode['Id'],
-        parentId: parentId,
+        rootId,
+        parentId,
         displayName: browseNode['DisplayName'],
         contextFreeName: browseNode['ContextFreeName'],
     };
