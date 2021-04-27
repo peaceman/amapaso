@@ -1,3 +1,4 @@
+const EventEmitter = require('events');
 const ProductAdvertisingAPIv1 = require('paapi5-nodejs-sdk');
 const pRetry = require('p-retry');
 const log = require('../log');
@@ -10,6 +11,11 @@ function ApiClient(config, limiter) {
     this.client = new ProductAdvertisingAPIv1.DefaultApi(createClientFromConfig(config));
     this.limiter = limiter;
 }
+
+ApiClient.EVENTS = {
+    REQUEST_FAILED: Symbol('request failed'),
+    REQUEST_SUCEEDED: Symbol('request succeeded'),
+};
 
 ApiClient.prototype.getBrowseNodesLimit = function () {
     return 10;
@@ -89,7 +95,95 @@ class TooManyRequestsError {
     }
 }
 
+class DailyRateLimitBreachDetector extends EventEmitter {
+    constructor(storage, {breachLimit = 10} = {}) {
+        super();
+
+        this.storage = storage;
+        this.breachLimit = breachLimit;
+    }
+
+    /**
+     * @param {EventEmitter} apiClient
+     */
+    watchApiClient(apiClient) {
+        apiClient.on(ApiClient.EVENTS.REQUEST_FAILED, e => {
+            if (e instanceof TooManyRequestsError) {
+                this.registerFailedRequest(apiClient, e);
+            } else {
+                this.registerSucceededRequest(apiClient);
+            }
+        });
+
+        apiClient.on(ApiClient.EVENTS.REQUEST_SUCEEDED, () => {
+            this.registerSucceededRequest(apiClient);
+        });
+    }
+
+    async registerFailedRequest(apiClient, e) {
+        const configHash = apiClient.getConfigHash();
+        await this.storage.addFailedRequest(configHash, this.breachLimit);
+
+        if (await this.storage.getFailedRequestCount(configHash) < this.breachLimit) {
+            return;
+        }
+
+        this.emit(DailyRateLimitBreachDetector.EVENTS.RATE_LIMIT_BREACHED, apiClient);
+    }
+
+    async registerSucceededRequest(apiClient) {
+        const configHash = apiClient.getConfigHash();
+        await this.storage.addSucceededRequest(configHash, this.breachLimit);
+    }
+}
+
+DailyRateLimitBreachDetector.EVENTS = {
+    RATE_LIMIT_BREACHED: Symbol('rate limit breached'),
+};
+
+class DailyRateLimitBreachStorage {
+    constructor(redis) {
+        this.redis = redis;
+    }
+
+    async addFailedRequest(identifier, limit) {
+        await this.addRequest(identifier, limit, false);
+    }
+
+    async addSucceededRequest(identifier, limit) {
+        await this.addRequest(identifier, limit, true);
+    }
+
+    async addRequest(identifier, limit, value) {
+        const listName = this.getListName(identifier);
+        await this.redis.lpush(listName, value);
+        await this.redis.ltrim(listName, limit - 1);
+    }
+
+    async getFailedRequestCount(identifier) {
+        const values = await this.redis.lrange(this.getListName(identifier), 0, -1);
+
+        // count continuous failed requests
+        let counter = 0;
+        for (const val of values) {
+            if (val === true) {
+                break;
+            } else {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
+
+    getListName(identifier)  {
+        return `rlb-${identifier}`;
+    }
+}
+
 module.exports = {
     ApiClient,
     TooManyRequestsError,
+    DailyRateLimitBreachDetector,
+    DailyRateLimitBreachStorage,
 };
