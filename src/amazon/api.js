@@ -66,14 +66,30 @@ function promiseRequest(client, requestMethod, request) {
         client[requestMethod](request, (error, data, response) => {
             if (error) {
                 log.error('PAAPI Error', {error, data, response});
-                reject(error);
+                reject(convertPAAPIError(error));
             } else {
+                // get rid of the annoying paapi sdk data types
                 resolve(JSON.parse(JSON.stringify(data)));
             }
         })
     });
 }
 
+function convertPAAPIError(error) {
+    if (error.status === 429) {
+        return new TooManyRequestsError(error);
+    } else {
+        return error;
+    }
+}
+
+class TooManyRequestsError {
+    constructor(previous) {
+        this.previous = previous;
+    }
+}
+
 module.exports = {
     ApiClient,
+    TooManyRequestsError,
 };
