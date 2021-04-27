@@ -1,59 +1,77 @@
 const EventEmitter = require('events');
+const crypto = require('crypto');
 const ProductAdvertisingAPIv1 = require('paapi5-nodejs-sdk');
 const pRetry = require('p-retry');
 const log = require('../log');
 
-const applyCommonParams = Symbol('applyCommonParams');
-const execRequest = Symbol('execRequest');
+class ApiClient extends EventEmitter {
+    constructor(config, limiter) {
+        super();
+        this.config = config;
+        this.client = new ProductAdvertisingAPIv1.DefaultApi(createClientFromConfig(config));
+        this.limiter = limiter;
+    }
 
-function ApiClient(config, limiter) {
-    this.config = config;
-    this.client = new ProductAdvertisingAPIv1.DefaultApi(createClientFromConfig(config));
-    this.limiter = limiter;
+    getBrowseNodesLimit() {
+        return 10;
+    }
+
+    async getBrowseNodes(nodeIds) {
+        if (!nodeIds.length) return;
+
+        const request = new ProductAdvertisingAPIv1.GetBrowseNodesRequest();
+        request['BrowseNodeIds'] = nodeIds;
+        request['Resources'] = ['BrowseNodes.Ancestor', 'BrowseNodes.Children'];
+
+        this.applyCommonParams(request);
+
+        const response = await this.execRequest(
+            'getBrowseNodes',
+            request
+        );
+
+        return response?.BrowseNodesResult?.BrowseNodes ?? [];
+    }
+
+    applyCommonParams(request) {
+        request['PartnerTag'] = this.config.partnerTag;
+        request['PartnerType'] = this.config.partnerType;
+    }
+
+    execRequest(requestMethod, responseType, request) {
+        const scheduleFn = async () => {
+            try {
+                await promiseRequest(
+                    this.client,
+                    requestMethod,
+                    responseType,
+                    request
+                );
+
+                this.emit(ApiClient.EVENTS.REQUEST_SUCEEDED);
+            } catch (e) {
+                this.emit(ApiClient.EVENTS.REQUEST_FAILED, e);
+
+                throw e;
+            }
+        };
+
+        const retryFn = () => this.limiter.schedule(scheduleFn);
+
+        return pRetry(retryFn);
+    }
+
+    getConfigHash() {
+        return crypto
+            .createHash('sha256')
+            .update(JSON.stringify(this.config))
+            .digest('hex');
+    }
 }
 
 ApiClient.EVENTS = {
     REQUEST_FAILED: Symbol('request failed'),
     REQUEST_SUCEEDED: Symbol('request succeeded'),
-};
-
-ApiClient.prototype.getBrowseNodesLimit = function () {
-    return 10;
-};
-
-ApiClient.prototype.getBrowseNodes = async function (nodeIds) {
-    if (!nodeIds.length) return;
-
-    const request = new ProductAdvertisingAPIv1.GetBrowseNodesRequest();
-    request['BrowseNodeIds'] = nodeIds;
-    request['Resources'] = ['BrowseNodes.Ancestor', 'BrowseNodes.Children'];
-
-    this[applyCommonParams](request);
-
-    const response = await this[execRequest](
-        'getBrowseNodes',
-        request
-    );
-
-    return response?.BrowseNodesResult?.BrowseNodes ?? [];
-};
-
-ApiClient.prototype[applyCommonParams] = function (request) {
-    request['PartnerTag'] = this.config.partnerTag;
-    request['PartnerType'] = this.config.partnerType;
-};
-
-ApiClient.prototype[execRequest] = function (requestMethod, responseType, request) {
-    const scheduleFn = () => promiseRequest(
-        this.client,
-        requestMethod,
-        responseType,
-        request
-    );
-
-    const retryFn = () => this.limiter.schedule(scheduleFn);
-
-    return pRetry(retryFn);
 };
 
 function createClientFromConfig(config) {
@@ -89,8 +107,10 @@ function convertPAAPIError(error) {
     }
 }
 
-class TooManyRequestsError {
+class TooManyRequestsError extends Error {
     constructor(previous) {
+        super('Too many requests');
+
         this.previous = previous;
     }
 }
