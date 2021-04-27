@@ -8,7 +8,7 @@ exports.up = async function (knex) {
         table.bigInteger('root_id')
             .notNullable()
             .references('categories.id')
-            .onDelete('restrict')
+            .onDelete('cascade')
             .onUpdate('cascade');
 
         table.bigInteger('parent_id')
