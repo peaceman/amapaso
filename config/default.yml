@@ -5,3 +5,11 @@ amazon:
   secretKey: null
   host: webservices.amazon.de
   region: eu-west-1
+  rateLimiter:
+    minTime: 50
+    datastore: ioredis
+    id: paapi
+    dailyRequests: 8640
+
+redis:
+  connectionUrl: undefined
