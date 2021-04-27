@@ -131,7 +131,7 @@ describe('daily rate limit breach storage', () => {
         await storage.addFailedRequest(identifier, limit);
 
         expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, false);
-        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, limit - 1);
+        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
     });
 
     it('adds failed requests as false and trims the list to limit', async () => {
@@ -141,7 +141,7 @@ describe('daily rate limit breach storage', () => {
         await storage.addSucceededRequest(identifier, limit);
 
         expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, true);
-        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, limit - 1);
+        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
     });
 
     it('counts failed requests', async () => {

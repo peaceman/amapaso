@@ -63,7 +63,7 @@ class ApiClient extends EventEmitter {
 
     getConfigHash() {
         return crypto
-            .createHash('sha256')
+            .createHash('md5')
             .update(JSON.stringify(this.config))
             .digest('hex');
     }
@@ -124,7 +124,7 @@ class DailyRateLimitBreachDetector extends EventEmitter {
     }
 
     /**
-     * @param {EventEmitter} apiClient
+     * @param {ApiClient} apiClient
      */
     watchApiClient(apiClient) {
         apiClient.on(ApiClient.EVENTS.REQUEST_FAILED, e => {
@@ -140,6 +140,11 @@ class DailyRateLimitBreachDetector extends EventEmitter {
         });
     }
 
+    /**
+     * @param {ApiClient} apiClient
+     * @param {TooManyRequestsError} e
+     * @returns
+     */
     async registerFailedRequest(apiClient, e) {
         const configHash = apiClient.getConfigHash();
         await this.storage.addFailedRequest(configHash, this.breachLimit);
@@ -151,6 +156,9 @@ class DailyRateLimitBreachDetector extends EventEmitter {
         this.emit(DailyRateLimitBreachDetector.EVENTS.RATE_LIMIT_BREACHED, apiClient);
     }
 
+    /**
+     * @param {ApiClient} apiClient
+     */
     async registerSucceededRequest(apiClient) {
         const configHash = apiClient.getConfigHash();
         await this.storage.addSucceededRequest(configHash, this.breachLimit);
@@ -166,20 +174,37 @@ class DailyRateLimitBreachStorage {
         this.redis = redis;
     }
 
+    /**
+     * @param {string} identifier
+     * @param {number} limit
+     */
     async addFailedRequest(identifier, limit) {
         await this.addRequest(identifier, limit, false);
     }
 
+    /**
+     * @param {string} identifier
+     * @param {number} limit
+     */
     async addSucceededRequest(identifier, limit) {
         await this.addRequest(identifier, limit, true);
     }
 
+    /**
+     * @param {string} identifier
+     * @param {number} limit
+     * @param {boolean} value
+     */
     async addRequest(identifier, limit, value) {
         const listName = this.getListName(identifier);
         await this.redis.lpush(listName, value);
-        await this.redis.ltrim(listName, limit - 1);
+        await this.redis.ltrim(listName, 0, limit - 1);
     }
 
+    /**
+     * @param {string} identifier
+     * @returns {number}
+     */
     async getFailedRequestCount(identifier) {
         const values = await this.redis.lrange(this.getListName(identifier), 0, -1);
 
@@ -196,6 +221,10 @@ class DailyRateLimitBreachStorage {
         return counter;
     }
 
+    /**
+     * @param {string} identifier
+     * @returns {string}
+     */
     getListName(identifier)  {
         return `rlb-${identifier}`;
     }
