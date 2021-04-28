@@ -43,7 +43,7 @@ class ApiClient extends EventEmitter {
     execRequest(requestMethod, responseType, request) {
         const scheduleFn = async () => {
             try {
-                await promiseRequest(
+                const response = await promiseRequest(
                     this.client,
                     requestMethod,
                     responseType,
@@ -51,6 +51,8 @@ class ApiClient extends EventEmitter {
                 );
 
                 this.emit(ApiClient.EVENTS.REQUEST_SUCEEDED);
+
+                return response;
             } catch (e) {
                 this.emit(ApiClient.EVENTS.REQUEST_FAILED, e);
 
