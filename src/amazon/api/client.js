@@ -40,13 +40,12 @@ class ApiClient extends EventEmitter {
         request['PartnerType'] = this.config.get('partnerType');
     }
 
-    execRequest(requestMethod, responseType, request) {
+    execRequest(requestMethod, request) {
         const scheduleFn = async () => {
             try {
                 const response = await promiseRequest(
                     this.client,
                     requestMethod,
-                    responseType,
                     request
                 );
 
