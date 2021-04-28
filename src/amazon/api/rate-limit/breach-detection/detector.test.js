@@ -1,10 +1,7 @@
 const EventEmitter = require('events');
-const {
-    ApiClient,
-    DailyRateLimitBreachDetector,
-    TooManyRequestsError,
-    DailyRateLimitBreachStorage,
-} = require('./api');
+const { DailyRateLimitBreachDetector } = require('./detector');
+const { ApiClient } = require('../../client');
+const { TooManyRequestsError } = require('../../errors');
 
 describe('daily rate limit breach detector', () => {
     const breachLimit = 5;
@@ -108,51 +105,4 @@ describe('daily rate limit breach detector', () => {
         expect(storage.addFailedRequest.mock.calls.length).toBe(0);
         expect(storage.addSucceededRequest).toHaveBeenCalledWith(apiClientConfigHash, breachLimit);
     })
-});
-
-describe('daily rate limit breach storage', () => {
-    const identifier = 'foobar';
-    const limit = 2;
-
-    function setupRedis() {
-        const redis = {
-            lpush: jest.fn(),
-            ltrim: jest.fn(),
-            lrange: jest.fn(),
-        };
-
-        return redis;
-    }
-
-    it('adds failed requests as false and trims the list to limit', async () => {
-        const redis = setupRedis();
-        const storage = new DailyRateLimitBreachStorage(redis);
-
-        await storage.addFailedRequest(identifier, limit);
-
-        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, false);
-        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
-    });
-
-    it('adds failed requests as false and trims the list to limit', async () => {
-        const redis = setupRedis();
-        const storage = new DailyRateLimitBreachStorage(redis);
-
-        await storage.addSucceededRequest(identifier, limit);
-
-        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, true);
-        expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
-    });
-
-    it('counts failed requests', async () => {
-        const redis = setupRedis();
-        const storage = new DailyRateLimitBreachStorage(redis);
-
-        redis.lrange.mockReturnValue([false, false, true, false]);
-
-        const failedRequestCount = await storage.getFailedRequestCount(identifier);
-
-        expect(failedRequestCount).toBe(2);
-        expect(redis.lrange).toHaveBeenCalledWith(`rlb-${identifier}`, 0, -1);
-    });
 });

@@ -1,6 +1,8 @@
 const Bottleneck = require('bottleneck');
 const config = require('config');
-const log = require('../log');
+
+const log = require('../../../log');
+const { dailyRateLimitBreachDetector, DailyRateLimitBreachDetector } = require('./breach-detection')
 
 const limiterConfig = config.get('amazon.rateLimiter');
 
@@ -27,5 +29,7 @@ function reachedDailyLimit() {
 
 module.exports = {
     limiter,
+    dailyRateLimitBreachDetector,
+    DailyRateLimitBreachDetector,
     reachedDailyLimit,
 };
