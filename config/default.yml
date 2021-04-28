@@ -1,15 +1,18 @@
 amazon:
-  partnerTag: null
+  partnerTag: undefined
   partnerType: Associates
-  accessKey: null
-  secretKey: null
+  accessKey: undefined
+  secretKey: undefined
   host: webservices.amazon.de
   region: eu-west-1
   rateLimiter:
-    minTime: 50
+    minTime: 1500
     datastore: ioredis
     id: paapi
     dailyRequests: 8640
+
+database:
+  connectionUrl: undefined
 
 redis:
   connectionUrl: undefined

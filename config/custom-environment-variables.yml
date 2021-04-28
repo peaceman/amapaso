@@ -5,3 +5,6 @@ amazon:
 
 database:
   connectionUrl: "DB_CONNECTION_URL"
+
+redis:
+  connectionUrl: "REDIS_CONNECTION_URL"
