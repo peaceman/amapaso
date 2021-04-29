@@ -26,7 +26,7 @@ class DailyRateLimitBreachStorage {
      */
     async addRequest(identifier, limit, value) {
         const listName = this.getListName(identifier);
-        await this.redis.lpush(listName, value);
+        await this.redis.lpush(listName, JSON.stringify(value));
         await this.redis.ltrim(listName, 0, limit - 1);
     }
 
@@ -35,7 +35,8 @@ class DailyRateLimitBreachStorage {
      * @returns {number}
      */
     async getFailedRequestCount(identifier) {
-        const values = await this.redis.lrange(this.getListName(identifier), 0, -1);
+        const values = (await this.redis.lrange(this.getListName(identifier), 0, -1))
+            .map(v => JSON.parse(v));
 
         // count continuous failed requests
         let counter = 0;

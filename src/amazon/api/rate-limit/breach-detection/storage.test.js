@@ -20,7 +20,7 @@ describe('daily rate limit breach storage', () => {
 
         await storage.addFailedRequest(identifier, limit);
 
-        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, false);
+        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, JSON.stringify(false));
         expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
     });
 
@@ -30,7 +30,7 @@ describe('daily rate limit breach storage', () => {
 
         await storage.addSucceededRequest(identifier, limit);
 
-        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, true);
+        expect(redis.lpush).toHaveBeenCalledWith(`rlb-${identifier}`, JSON.stringify(true));
         expect(redis.ltrim).toHaveBeenCalledWith(`rlb-${identifier}`, 0, limit - 1);
     });
 
@@ -38,7 +38,7 @@ describe('daily rate limit breach storage', () => {
         const redis = setupRedis();
         const storage = new DailyRateLimitBreachStorage(redis);
 
-        redis.lrange.mockReturnValue([false, false, true, false]);
+        redis.lrange.mockReturnValue([false, false, true, false].map(v => JSON.stringify(v)));
 
         const failedRequestCount = await storage.getFailedRequestCount(identifier);
 

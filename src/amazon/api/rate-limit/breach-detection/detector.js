@@ -36,7 +36,8 @@ class DailyRateLimitBreachDetector extends EventEmitter {
         const configHash = apiClient.getConfigHash();
         await this.storage.addFailedRequest(configHash, this.breachLimit);
 
-        if (await this.storage.getFailedRequestCount(configHash) < this.breachLimit) {
+        const failedRequestCount = await this.storage.getFailedRequestCount(configHash);
+        if (failedRequestCount < this.breachLimit) {
             return;
         }
 
