@@ -1,6 +1,6 @@
-const { importCategoryTree } = require('../../import/category');
+const { importCategoryTree } = require('../../../import/category');
 
-exports.command = 'update-categories <file>'
+exports.command = 'update <file>';
 exports.describe = 'uses the given file as base for an import of categories';
 exports.builder = yargs => {
     yargs
@@ -14,4 +14,7 @@ exports.handler = async argv => {
     await importCategoryTree.execute({
         csvFilePath: argv.file,
     });
+
+    // redis seems to block the process exit
+    process.exit();
 };
