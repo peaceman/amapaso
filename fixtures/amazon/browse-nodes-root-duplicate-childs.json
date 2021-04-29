@@ -1,0 +1,58 @@
+[
+    {
+        "Children": [
+            {
+                "ContextFreeName": "Erweiterte Suche",
+                "DisplayName": "Erweiterte Suche",
+                "Id": "931572031"
+            },
+            {
+                "ContextFreeName": "Featured Categories",
+                "DisplayName": "Featured Categories",
+                "Id": "78866031"
+            },
+            {
+                "ContextFreeName": "Bekleidung",
+                "DisplayName": "Kategorien",
+                "Id": "78689031"
+            },
+            {
+                "ContextFreeName": "Marken",
+                "DisplayName": "Marken",
+                "Id": "78867031"
+            }
+        ],
+        "ContextFreeName": "root alpha cnf",
+        "DisplayName": "root alpha dn",
+        "Id": "root alpha",
+        "IsRoot": true
+    },
+    {
+        "Children": [
+            {
+                "ContextFreeName": "Erweiterte Suche",
+                "DisplayName": "Erweiterte Suche",
+                "Id": "931572031"
+            },
+            {
+                "ContextFreeName": "Featured Categories",
+                "DisplayName": "Featured Categories",
+                "Id": "931573031"
+            },
+            {
+                "ContextFreeName": "Elektro-Großgeräte",
+                "DisplayName": "Kategorien",
+                "Id": "908824031"
+            },
+            {
+                "ContextFreeName": "Spezielle Eigenschaften",
+                "DisplayName": "Spezielle Eigenschaften",
+                "Id": "908825031"
+            }
+        ],
+        "ContextFreeName": "root beta cfn",
+        "DisplayName": "root beta dn",
+        "Id": "root beta",
+        "IsRoot": true
+    }
+]

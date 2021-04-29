@@ -51,21 +51,18 @@ function extractRootAncestorFromBrowseNode(browseNode) {
 async function fetchAndStoreNodeHierarchy(apiClient, storeCategory, rootNodeIds) {
     const browseNodesLimit = apiClient.getBrowseNodesLimit();
     const visitedNodeIds = new Map();
+    const filterAndMarkNode = v => {
+        if (!visitedNodeIds.has(v)) {
+            visitedNodeIds.set(v, true);
+            return true;
+        }
+
+        return false;
+    };
 
     async function fetchAndStore(nodeIds, rootId = undefined, parentId = undefined) {
         // prevent argument mutation
         nodeIds = nodeIds.slice();
-        // prevent duplicate fetches of node information
-        // amazon seems to have a category under multiple parent categories
-        // but with different names
-        nodeIds = nodeIds.filter(v => {
-            if (!visitedNodeIds.has(v)) {
-                visitedNodeIds.set(v, true);
-                return true;
-            }
-
-            return false;
-        });
 
         const newFetchTasks = [];
 
@@ -83,7 +80,12 @@ async function fetchAndStoreNodeHierarchy(apiClient, storeCategory, rootNodeIds)
                     ));
                 }
 
-                const childs = parentNode['Children'] || [];
+                // prevent duplicate fetches of node information
+                // amazon seems to have a category under multiple parent categories
+                // but with different names
+                const childs = (parentNode['Children'] || [])
+                    .filter(n => filterAndMarkNode(n['Id']));
+
                 for (const child of childs) {
                     await storeCategory(convertBrowseNodeToCategory(
                         child,

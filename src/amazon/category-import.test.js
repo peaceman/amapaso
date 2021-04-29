@@ -227,6 +227,41 @@ describe('fetch and store node hierarchy', () => {
             contextFreeName: secondLevelChild.ContextFreeName,
         }]);
     });
+
+    it('skips child nodes that were already imported under another parent', async () => {
+        const browseNodesResult = JSON.parse(fs.readFileSync(
+            './fixtures/amazon/browse-nodes-root-duplicate-childs.json'
+        ));
+
+        const getBrowseNodesLimit = jest.fn().mockReturnValue(10);
+        const getBrowseNodes = jest.fn().mockReturnValueOnce(browseNodesResult)
+            .mockReturnValue([]);
+        const apiClient = { getBrowseNodesLimit, getBrowseNodes };
+
+        const storeCategory = jest.fn();
+
+        await fetchAndStoreNodeHierarchy(apiClient, storeCategory, ['foo']);
+
+        expect(storeCategory.mock.calls).toContainEqual([
+            {
+                id: '931572031',
+                rootId: 'root alpha',
+                parentId: 'root alpha',
+                displayName: 'Erweiterte Suche',
+                contextFreeName: 'Erweiterte Suche',
+            }
+        ]);
+
+        expect(storeCategory.mock.calls).not.toContainEqual([
+            {
+                id: '931572031',
+                rootId: 'root beta',
+                parentId: 'root beta',
+                displayName: 'Erweiterte Suche',
+                contextFreeName: 'Erweiterte Suche',
+            }
+        ]);
+    });
 });
 
 async function* createAsyncGeneratorFromArray(data) {
