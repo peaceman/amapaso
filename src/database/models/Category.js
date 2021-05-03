@@ -1,8 +1,6 @@
 const BaseModel = require('./BaseModel');
 
 class Category extends BaseModel {
-    static useTimestamps = false;
-
     static get tableName() {
         return 'categories';
     }
