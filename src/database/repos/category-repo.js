@@ -1,5 +1,6 @@
 const Category = require('../models/Category');
 const { raw } = require('objection');
+const { subDays } = require('date-fns');
 
 class CategoryRepo {
     /**
@@ -81,6 +82,34 @@ class CategoryRepo {
                 }
             }
         });
+    }
+
+    async fetchEligibleForPeriodicProductsImport({ limit = 10, daysSinceLastQueueing = 7 } = {}) {
+        const categories = await Category.query()
+            .leftJoin('category_product_imports as cip', 'cip.id', function () {
+                this.select('cipi.id')
+                    .from('category_product_imports as cipi')
+                    .where('cipi.category_id', '=', raw('categories.id'))
+                    .orderBy('cipi.queued_at', 'desc')
+                    .limit(1)
+            })
+            .where(function () {
+                this.whereNull('cip.queued_at')
+                    .orWhere('cip.queued_at', '<=', subDays(new Date(), daysSinceLastQueueing));
+            })
+            .limit(limit);
+
+        return categories;
+    }
+
+    /**
+     * @param {Category} category
+     */
+    async markQueuedProductsImport(category) {
+        await category.$relatedQuery('productImports')
+            .insert({
+                queuedAt: new Date().toISOString(),
+            });
     }
 }
 

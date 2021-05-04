@@ -21,6 +21,7 @@ class Product extends BaseModel {
 
     static get relationMappings() {
         const Category = require('./Category');
+        const CategoryProductImport = require('./CategoryProductImport');
 
         return {
             categories: {
@@ -29,8 +30,8 @@ class Product extends BaseModel {
                 join: {
                     from: 'products.asin',
                     through: {
-                        from: 'product_categories.productAsin',
-                        to: 'product_categories.categoryId',
+                        from: 'product_categories.product_asin',
+                        to: 'product_categories.category_id',
                     },
                     to: 'categories.id',
                 },
@@ -39,7 +40,7 @@ class Product extends BaseModel {
                 relation: Model.BelongsToOneRelation,
                 modelClass: Product,
                 join: {
-                    from: 'products.parentAsin',
+                    from: 'products.parent_asin',
                     to: 'products.asin',
                 },
             },
@@ -48,7 +49,15 @@ class Product extends BaseModel {
                 modelClass: Product,
                 join: {
                     from: 'products.asin',
-                    to: 'products.parentAsin',
+                    to: 'products.parent_asin',
+                },
+            },
+            productImports: {
+                relation: Model.HasManyRelation,
+                modelClass: CategoryProductImport,
+                join: {
+                    from: 'categories.id',
+                    to: 'category_product_imports.category_id',
                 },
             },
         };

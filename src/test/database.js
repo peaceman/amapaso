@@ -37,10 +37,29 @@ async function dropDatabase(knex) {
     await knex.destroy();
 }
 
-async function resetDatabase(knex) {
+async function truncateDatabase(knex) {
+    const tables = await fetchTableNames(knex);
+
+    await knex.raw('set foreign_key_checks = 0');
+
+    for (const table of tables.filter(n => !n.startsWith('knex'))) {
+        await knex.raw(`truncate table \`${table}\``);
+    }
+
+    await knex.raw('set foreign_key_checks = 1');
+
+}
+
+async function fetchTableNames(knex) {
+    const tables = await knex.raw('show tables');
+
+    return (tables[0] || [])
+        .map(row => Object.values(row))
+        .flat();
 }
 
 module.exports = {
     createDatabase,
     dropDatabase,
+    truncateDatabase,
 };

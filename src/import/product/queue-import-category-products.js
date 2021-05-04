@@ -31,7 +31,7 @@ class QueueImportCategoryProducts {
         }
 
         const eligibleCategories = await this.categoryRepo
-            .fetchCategoriesEligibleForPeriodicImport();
+            .fetchEligibleForPeriodicProductsImport();
 
         if (eligibleCategories.length === 0) {
             log.info('Found no eligible categories for the periodic products import');

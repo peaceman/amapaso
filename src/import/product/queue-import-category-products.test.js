@@ -18,7 +18,7 @@ describe('queue category products import', () => {
             await queueCategoryProductsImport.execute();
 
             expect(rateLimiter.check).toHaveBeenCalled();
-            expect(categoryRepo.fetchCategoriesEligibleForPeriodicImport).not.toHaveBeenCalled();
+            expect(categoryRepo.fetchEligibleForPeriodicProductsImport).not.toHaveBeenCalled();
         }
     );
 
@@ -30,7 +30,7 @@ describe('queue category products import', () => {
         const categories = categoryIds.map(id => Category.fromDatabaseJson({id}));
 
         rateLimiter.check.mockReturnValue(Promise.resolve(true));
-        categoryRepo.fetchCategoriesEligibleForPeriodicImport
+        categoryRepo.fetchEligibleForPeriodicProductsImport
             .mockReturnValue(Promise.resolve(categories));
 
         const queueCategoryProductsImport = new QueueImportCategoryProducts(
@@ -52,7 +52,7 @@ describe('queue category products import', () => {
 
     function setupCategoryRepo() {
         return {
-            fetchCategoriesEligibleForPeriodicImport: jest.fn(),
+            fetchEligibleForPeriodicProductsImport: jest.fn(),
             markQueuedProductsImport: jest.fn(),
         };
     }

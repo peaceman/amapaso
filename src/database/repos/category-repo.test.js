@@ -1,7 +1,8 @@
-const { createDatabase, dropDatabase } = require('../../test/database');
+const { createDatabase, dropDatabase, truncateDatabase } = require('../../test/database');
 const { Model } = require('objection');
 const { CategoryRepo } = require('./category-repo');
 const Category = require('../models/Category');
+const { subDays } = require('date-fns');
 
 describe('category repo integration tests', () => {
     let db;
@@ -14,6 +15,15 @@ describe('category repo integration tests', () => {
     afterAll(async () => {
         await dropDatabase(db);
     });
+
+    afterEach(async () => {
+        await truncateDatabase(db);
+    });
+
+    const categoryDefaults = {
+        displayName: 'a',
+        contextFreeName: 'a',
+    };
 
     it('builds a nested set per category root', async () => {
         // insert test data
@@ -37,8 +47,7 @@ describe('category repo integration tests', () => {
             await Category
                 .fromDatabaseJson({
                     ...v,
-                    displayName: 'a',
-                    contextFreeName: 'a',
+                    ...categoryDefaults,
                     nsLeft: undefined,
                     nsRight: undefined,
                 })
@@ -57,4 +66,92 @@ describe('category repo integration tests', () => {
             expect(cat).toEqual(expect.objectContaining(v));
         }
     });
-})
+
+    it('fetches eligible categories for the periodic product import', async () => {
+        // category without import
+        const [categoryWithoutImport] = await Category
+            .query()
+            .insertGraphAndFetch([
+                {
+                    id: '1',
+                    rootId: '1',
+                    ...categoryDefaults,
+                }
+            ]);
+
+        // category with queued import
+        const [categoryWithQueuedImport] = await Category
+            .query()
+            .insertGraphAndFetch([
+                {
+                    id: '2',
+                    rootId: '1',
+                    ...categoryDefaults,
+                    productImports: [
+                        {
+                            queuedAt: new Date().toISOString(),
+                        }
+                    ]
+                }
+            ]);
+
+        // category with old stopped import
+        const [categoryWithOldStoppedImport] = await Category
+            .query()
+            .insertGraphAndFetch([
+                {
+                    id: '3',
+                    rootId: '1',
+                    ...categoryDefaults,
+                    productImports: [
+                        {
+                            queuedAt: subDays(new Date(), 90).toISOString(),
+                            startedAt: subDays(new Date(), 89).toISOString(),
+                            stoppedAt: subDays(new Date(), 88).toISOString(),
+                        },
+                    ],
+                },
+            ]);
+
+        // category with recently stopped import
+        const [categoryWithRecentlyStoppedImport] = await Category
+            .query()
+            .insertGraphAndFetch([
+                {
+                    id: '4',
+                    rootId: '1',
+                    ...categoryDefaults,
+                    productImports: [
+                        {
+                            queuedAt: subDays(new Date(), 5).toISOString(),
+                            startedAt: subDays(new Date(), 4).toISOString(),
+                            stoppedAt: subDays(new Date(), 3).toISOString(),
+                        },
+                    ],
+                },
+            ]);
+
+        // execute
+        const repo = new CategoryRepo();
+        const categories = await repo.fetchEligibleForPeriodicProductsImport();
+
+        // assert
+        expect(categories.length).toBe(2);
+    });
+
+    it('marks queued product imports', async () => {
+        const category = await Category.query()
+            .insert({
+                id: '1',
+                rootId: '1',
+                ...categoryDefaults,
+            });
+
+        // execute
+        const repo = new CategoryRepo();
+        await repo.markQueuedProductsImport(category);
+
+        const productImports = await category.$relatedQuery('productImports');
+        expect(productImports.length).toBe(1);
+    });
+});

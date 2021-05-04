@@ -1,3 +1,4 @@
+const { Model } = require('objection');
 const BaseModel = require('./BaseModel');
 
 class Category extends BaseModel {
@@ -16,6 +17,21 @@ class Category extends BaseModel {
                 nsRight: { type: ['number', 'null'], default: null },
                 displayName: { type: 'string' },
                 contextFreeName: { type: 'string' },
+            },
+        };
+    }
+
+    static get relationMappings() {
+        const CategoryProductImport = require('./CategoryProductImport');
+
+        return {
+            productImports: {
+                relation: Model.HasManyRelation,
+                modelClass: CategoryProductImport,
+                join: {
+                    from: 'categories.id',
+                    to: 'category_product_imports.category_id',
+                },
             },
         };
     }
