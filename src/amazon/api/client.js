@@ -35,6 +35,71 @@ class ApiClient extends EventEmitter {
         return response?.BrowseNodesResult?.BrowseNodes ?? [];
     }
 
+    /**
+     * @param {string} categoryId
+     * @param {number} page
+     */
+    async searchCategoryItems(categoryId, page) {
+        const request = new ProductAdvertisingAPIv1.SearchItemsRequest();
+        request['BrowseNodeId'] = categoryId;
+        request['ItemPage'] = page;
+        request['SortBy'] = 'AvgCustomerReviews';
+        request['Resources'] = [
+            'BrowseNodeInfo.BrowseNodes',
+            'CustomerReviews.Count',
+            'CustomerReviews.StarRating',
+            'Images.Primary.Small',
+            'Images.Primary.Medium',
+            'Images.Primary.Large',
+            'Images.Variants.Small',
+            'Images.Variants.Medium',
+            'Images.Variants.Large',
+            'ItemInfo.ByLineInfo',
+            'ItemInfo.ContentInfo',
+            'ItemInfo.ContentRating',
+            'ItemInfo.Classifications',
+            'ItemInfo.ExternalIds',
+            'ItemInfo.Features',
+            'ItemInfo.ManufactureInfo',
+            'ItemInfo.ProductInfo',
+            'ItemInfo.TechnicalInfo',
+            'ItemInfo.Title',
+            'ItemInfo.TradeInInfo',
+            'Offers.Listings.Availability.MaxOrderQuantity',
+            'Offers.Listings.Availability.Message',
+            'Offers.Listings.Availability.MinOrderQuantity',
+            'Offers.Listings.Availability.Type',
+            'Offers.Listings.Condition',
+            'Offers.Listings.Condition.ConditionNote',
+            'Offers.Listings.Condition.SubCondition',
+            'Offers.Listings.DeliveryInfo.IsAmazonFulfilled',
+            'Offers.Listings.DeliveryInfo.IsFreeShippingEligible',
+            'Offers.Listings.DeliveryInfo.IsPrimeEligible',
+            'Offers.Listings.DeliveryInfo.ShippingCharges',
+            'Offers.Listings.IsBuyBoxWinner',
+            'Offers.Listings.LoyaltyPoints.Points',
+            'Offers.Listings.MerchantInfo',
+            'Offers.Listings.Price',
+            'Offers.Listings.ProgramEligibility.IsPrimeExclusive',
+            'Offers.Listings.ProgramEligibility.IsPrimePantry',
+            'Offers.Listings.Promotions',
+            'Offers.Listings.SavingBasis',
+            'Offers.Summaries.HighestPrice',
+            'Offers.Summaries.LowestPrice',
+            'Offers.Summaries.OfferCount',
+            'ParentASIN'
+        ];
+
+        this.applyCommonParams(request);
+
+        const response = await this.execRequest(
+            'searchItems',
+            request
+        );
+
+        return response?.SearchResult?.Items ?? [];
+    }
+
     applyCommonParams(request) {
         request['PartnerTag'] = this.config.get('partnerTag');
         request['PartnerType'] = this.config.get('partnerType');
