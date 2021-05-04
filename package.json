@@ -9,6 +9,7 @@
   "author": "nixalio@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "bullmq": "^1.24.0",
     "bunyan": "^1.8.15",
     "config": "^3.3.6",
     "csv-parse": "^4.15.4",
