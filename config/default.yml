@@ -12,7 +12,11 @@ amazon:
     dailyRequests: 8640
 
 database:
-  connectionUrl: undefined
+  host: undefined
+  port: undefined
+  user: undefined
+  password: undefined
+  name: undefined
 
 redis:
   connectionUrl: undefined

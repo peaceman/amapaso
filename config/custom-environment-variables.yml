@@ -4,7 +4,11 @@ amazon:
   secretKey: "AMAZON_SECRET_KEY"
 
 database:
-  connectionUrl: "DB_CONNECTION_URL"
+  host: "DB_HOST"
+  port: "DB_PORT"
+  user: "DB_USER"
+  password: "DB_PASSWORD"
+  name: "DB_NAME"
 
 redis:
   connectionUrl: "REDIS_CONNECTION_URL"
