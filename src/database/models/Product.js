@@ -9,6 +9,7 @@ class Product extends BaseModel {
     static get jsonSchema() {
         return {
             type: 'object',
+            required: ['asin', 'data'],
             properties: {
                 asin: { type: 'string', minLength: 10, maxLength: 10 },
                 parentAsin: { type: ['string', 'null'], minLength: 10, maxLength: 10 },
@@ -19,9 +20,12 @@ class Product extends BaseModel {
         };
     }
 
+    static get idColumn() {
+        return 'asin';
+    }
+
     static get relationMappings() {
         const Category = require('./Category');
-        const CategoryProductImport = require('./CategoryProductImport');
 
         return {
             categories: {
@@ -50,14 +54,6 @@ class Product extends BaseModel {
                 join: {
                     from: 'products.asin',
                     to: 'products.parent_asin',
-                },
-            },
-            productImports: {
-                relation: Model.HasManyRelation,
-                modelClass: CategoryProductImport,
-                join: {
-                    from: 'categories.id',
-                    to: 'category_product_imports.category_id',
                 },
             },
         };

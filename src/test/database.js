@@ -12,6 +12,8 @@ function openConnection(databaseName = undefined) {
             user: config.get('database.user'),
             password: config.get('database.password'),
             database: databaseName,
+            supportBigNumbers: true,
+            bigNumberStrings: true,
         }
     });
 }
@@ -47,7 +49,6 @@ async function truncateDatabase(knex) {
     }
 
     await knex.raw('set foreign_key_checks = 1');
-
 }
 
 async function fetchTableNames(knex) {

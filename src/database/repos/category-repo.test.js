@@ -29,18 +29,18 @@ describe('category repo integration tests', () => {
         // insert test data
         const data = [
             // first root
-            { id: 1, rootId: 1, nsLeft: 1, nsRight: 10 },
-            { id: 2, rootId: 1, nsLeft: 2, nsRight: 7, parentId: 1 },
-            { id: 3, rootId: 1, nsLeft: 8, nsRight: 9, parentId: 1 },
-            { id: 4, rootId: 1, nsLeft: 3, nsRight: 4, parentId: 2 },
-            { id: 5, rootId: 1, nsLeft: 5, nsRight: 6, parentId: 2 },
+            { id: '1', rootId: '1', nsLeft: 1, nsRight: 10 },
+            { id: '2', rootId: '1', nsLeft: 2, nsRight: 7, parentId: '1' },
+            { id: '3', rootId: '1', nsLeft: 8, nsRight: 9, parentId: '1' },
+            { id: '4', rootId: '1', nsLeft: 3, nsRight: 4, parentId: '2' },
+            { id: '5', rootId: '1', nsLeft: 5, nsRight: 6, parentId: '2' },
 
             // second root
-            { id: 6, rootId: 6, nsLeft: 1, nsRight: 10 },
-            { id: 7, rootId: 6, nsLeft: 2, nsRight: 7, parentId: 6 },
-            { id: 8, rootId: 6, nsLeft: 8, nsRight: 9, parentId: 6 },
-            { id: 9, rootId: 6, nsLeft: 3, nsRight: 4, parentId: 7 },
-            { id: 10, rootId: 6, nsLeft: 5, nsRight: 6, parentId: 7 },
+            { id: '6', rootId: '6', nsLeft: 1, nsRight: 10 },
+            { id: '7', rootId: '6', nsLeft: 2, nsRight: 7, parentId: '6' },
+            { id: '8', rootId: '6', nsLeft: 8, nsRight: 9, parentId: '6' },
+            { id: '9', rootId: '6', nsLeft: 3, nsRight: 4, parentId: '7' },
+            { id: '10', rootId: '6', nsLeft: 5, nsRight: 6, parentId: '7' },
         ];
 
         for (const v of data) {

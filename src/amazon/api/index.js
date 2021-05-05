@@ -15,5 +15,6 @@ dailyRateLimitBreachDetector.on(
 );
 
 module.exports = {
+    ApiClient,
     apiClient,
 };

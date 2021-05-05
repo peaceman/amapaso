@@ -1,0 +1,900 @@
+[
+    {
+      "ASIN": "B06XNNMGPM",
+      "BrowseNodeInfo": {
+        "BrowseNodes": [
+          {
+            "ContextFreeName": "Motorradreifen & Felgen",
+            "DisplayName": "Reifen & Felgen",
+            "Id": "1",
+            "IsRoot": false
+          },
+          {
+            "ContextFreeName": "Motorradreifen & Felgen",
+            "DisplayName": "Reifen & Felgen",
+            "Id": "2",
+            "IsRoot": false
+          }
+        ]
+      },
+      "DetailPageURL": "https://www.amazon.de/dp/B06XNNMGPM?tag=sjammienators&linkCode=osi&th=1&psc=1",
+      "Images": {
+        "Primary": {
+          "Large": {
+            "Height": 500,
+            "URL": "https://m.media-amazon.com/images/I/51r5zLjG+NL._SL500_.jpg",
+            "Width": 500
+          },
+          "Medium": {
+            "Height": 160,
+            "URL": "https://m.media-amazon.com/images/I/51r5zLjG+NL._SL160_.jpg",
+            "Width": 160
+          },
+          "Small": {
+            "Height": 75,
+            "URL": "https://m.media-amazon.com/images/I/51r5zLjG+NL._SL75_.jpg",
+            "Width": 75
+          }
+        },
+        "Variants": [
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/312lhmSCCpL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/312lhmSCCpL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/312lhmSCCpL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/31aaNLuFUJL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/31aaNLuFUJL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/31aaNLuFUJL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41EMLSAzp6L._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41EMLSAzp6L._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41EMLSAzp6L._SL75_.jpg",
+              "Width": 75
+            }
+          }
+        ]
+      },
+      "ItemInfo": {
+        "ByLineInfo": {
+          "Brand": {
+            "DisplayValue": "VORCOOL",
+            "Label": "Brand",
+            "Locale": "de_DE"
+          },
+          "Manufacturer": {
+            "DisplayValue": "VORCOOL",
+            "Label": "Manufacturer",
+            "Locale": "de_DE"
+          }
+        },
+        "Classifications": {
+          "Binding": {
+            "DisplayValue": "Elektronik",
+            "Label": "Binding",
+            "Locale": "de_DE"
+          },
+          "ProductGroup": {
+            "DisplayValue": "Kabellos",
+            "Label": "ProductGroup",
+            "Locale": "de_DE"
+          }
+        },
+        "ExternalIds": {
+          "EANs": {
+            "DisplayValues": [
+              "0191388680387"
+            ],
+            "Label": "EAN",
+            "Locale": "en_US"
+          },
+          "UPCs": {
+            "DisplayValues": [
+              "191388680387"
+            ],
+            "Label": "UPC",
+            "Locale": "en_US"
+          }
+        },
+        "Features": {
+          "DisplayValues": [
+            "Material: Kupfer, vernickelt",
+            "Entworfen mit einem Siegel angebracht zu einer beweglichen, federbelasteten Pin, die Druckluft zu übergeben, wenn einen Reifen aufpumpen zu können.",
+            "Betriebsdruck bis zu 300 PSI akzeptiert.",
+            "Konzipiert für den Einsatz in Pkw, LKW, Motorrad, Fahrrad, ATV zusammen mit einem anderen Fahrzeug, das Reifen nutzt.",
+            "Heavy-Duty Stamm Ventileinsatz mit einem Temperaturbereich von-65 ° F (-54 ° C) und 250 ° F (121 ° C)."
+          ],
+          "Label": "Features",
+          "Locale": "de_DE"
+        },
+        "ManufactureInfo": {
+          "ItemPartNumber": {
+            "DisplayValue": "S2174825217O85252",
+            "Label": "PartNumber",
+            "Locale": "en_US"
+          }
+        },
+        "ProductInfo": {
+          "Color": {
+            "DisplayValue": "Wie gezeigt",
+            "Label": "Color",
+            "Locale": "de_DE"
+          },
+          "ItemDimensions": {
+            "Height": {
+              "DisplayValue": 0.393700787,
+              "Label": "Height",
+              "Locale": "de_DE",
+              "Unit": "Zoll"
+            },
+            "Length": {
+              "DisplayValue": 1.968503935,
+              "Label": "Length",
+              "Locale": "de_DE",
+              "Unit": "Zoll"
+            },
+            "Weight": {
+              "DisplayValue": 0.1543235834,
+              "Label": "Weight",
+              "Locale": "de_DE",
+              "Unit": "Pfund"
+            },
+            "Width": {
+              "DisplayValue": 1.574803148,
+              "Label": "Width",
+              "Locale": "de_DE",
+              "Unit": "Zoll"
+            }
+          },
+          "Size": {
+            "DisplayValue": "100PCS",
+            "Label": "Size",
+            "Locale": "de_DE"
+          }
+        },
+        "Title": {
+          "DisplayValue": "VORCOOL 100pcs PKW LKW Motorrad Reifen Reifen Ventil Stem Kern Ersatzteil",
+          "Label": "Title",
+          "Locale": "de_DE"
+        }
+      },
+      "Offers": {
+        "Listings": [
+          {
+            "Availability": {
+              "Message": "Auf Lager.",
+              "MinOrderQuantity": 1,
+              "Type": "Now"
+            },
+            "Condition": {
+              "SubCondition": {
+                "Value": "New"
+              },
+              "Value": "New"
+            },
+            "DeliveryInfo": {
+              "IsAmazonFulfilled": true,
+              "IsFreeShippingEligible": true,
+              "IsPrimeEligible": true
+            },
+            "Id": "L5WJ0h2ojnZ%2FCq%2FJeSg%2B8YiC4c%2B4mmt%2BQU4j0rAAWBCygLRY3JmxUm8GwDyVsP7YIJ8Unx%2FplccqrPUbqTS9Y3QBh1psAzX9WwhvdUKlF5TBjxIeM5mhl%2BeeBpf7MFOpY1ZjCR23aia7aU0ItYfybmSnpMF%2FztUn",
+            "IsBuyBoxWinner": true,
+            "MerchantInfo": {
+              "DefaultShippingCountry": "CN",
+              "FeedbackCount": 2311,
+              "FeedbackRating": 4.81,
+              "Id": "AM2O6YLW0PDVC",
+              "Name": "Linspencer"
+            },
+            "Price": {
+              "Amount": 7.99,
+              "Currency": "EUR",
+              "DisplayAmount": "7,99 €"
+            },
+            "ProgramEligibility": {
+              "IsPrimeExclusive": false,
+              "IsPrimePantry": false
+            },
+            "ViolatesMAP": false
+          }
+        ],
+        "Summaries": [
+          {
+            "Condition": {
+              "Value": "New"
+            },
+            "HighestPrice": {
+              "Amount": 7.99,
+              "Currency": "EUR",
+              "DisplayAmount": "7,99 €"
+            },
+            "LowestPrice": {
+              "Amount": 7.99,
+              "Currency": "EUR",
+              "DisplayAmount": "7,99 €"
+            },
+            "OfferCount": 2
+          }
+        ]
+      },
+      "ParentASIN": "B06XP76XMN"
+    },
+    {
+      "ASIN": "B085G8ZDM4",
+      "BrowseNodeInfo": {
+        "BrowseNodes": [
+          {
+            "ContextFreeName": "Motorradreifen & Felgen",
+            "DisplayName": "Reifen & Felgen",
+            "Id": "1",
+            "IsRoot": false
+          }
+        ]
+      },
+      "DetailPageURL": "https://www.amazon.de/dp/B085G8ZDM4?tag=sjammienators&linkCode=osi&th=1&psc=1",
+      "Images": {
+        "Primary": {
+          "Large": {
+            "Height": 500,
+            "URL": "https://m.media-amazon.com/images/I/41gz8bh9k7L._SL500_.jpg",
+            "Width": 500
+          },
+          "Medium": {
+            "Height": 160,
+            "URL": "https://m.media-amazon.com/images/I/41gz8bh9k7L._SL160_.jpg",
+            "Width": 160
+          },
+          "Small": {
+            "Height": 75,
+            "URL": "https://m.media-amazon.com/images/I/41gz8bh9k7L._SL75_.jpg",
+            "Width": 75
+          }
+        },
+        "Variants": [
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/51Gt24FdUEL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/51Gt24FdUEL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/51Gt24FdUEL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/410ZmcOCy0L._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/410ZmcOCy0L._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/410ZmcOCy0L._SL75_.jpg",
+              "Width": 75
+            }
+          }
+        ]
+      },
+      "ItemInfo": {
+        "ByLineInfo": {
+          "Brand": {
+            "DisplayValue": "ZHUOWU",
+            "Label": "Brand",
+            "Locale": "de_DE"
+          },
+          "Manufacturer": {
+            "DisplayValue": "ZHUOWU",
+            "Label": "Manufacturer",
+            "Locale": "de_DE"
+          }
+        },
+        "Classifications": {
+          "ProductGroup": {
+            "DisplayValue": "KFZ-Zubehör",
+            "Label": "ProductGroup",
+            "Locale": "de_DE"
+          }
+        },
+        "ExternalIds": {
+          "EANs": {
+            "DisplayValues": [
+              "0726972743669"
+            ],
+            "Label": "EAN",
+            "Locale": "en_US"
+          },
+          "UPCs": {
+            "DisplayValues": [
+              "726972743669"
+            ],
+            "Label": "UPC",
+            "Locale": "en_US"
+          }
+        },
+        "ManufactureInfo": {
+          "ItemPartNumber": {
+            "DisplayValue": "ZW-VSC-001-TI",
+            "Label": "PartNumber",
+            "Locale": "en_US"
+          }
+        },
+        "ProductInfo": {
+          "Color": {
+            "DisplayValue": "Grau",
+            "Label": "Color",
+            "Locale": "de_DE"
+          }
+        },
+        "Title": {
+          "DisplayValue": "CNC Aluminium Motorrad Ventilkappen Fahrzeugrad Reifenventil Schaftkappenabdeckungen Für Honda XADV 750 NC750 NC700 CB650R CBR650R CB650F CB1000R CRF1000L Africa Twin Grau",
+          "Label": "Title",
+          "Locale": "de_DE"
+        }
+      },
+      "Offers": {
+        "Listings": [
+          {
+            "Availability": {
+              "Message": "Auf Lager.",
+              "MinOrderQuantity": 1,
+              "Type": "Now"
+            },
+            "Condition": {
+              "SubCondition": {
+                "Value": "New"
+              },
+              "Value": "New"
+            },
+            "DeliveryInfo": {
+              "IsAmazonFulfilled": true,
+              "IsFreeShippingEligible": true,
+              "IsPrimeEligible": true
+            },
+            "Id": "L5WJ0h2ojnaut%2FqRYcZTZntMy2nKbp3bgk9D1IjigWh40zshihSOEUXgzwDDgP6k9tSPBz6s6H4x3Qjz3h8wrSYhIXD1k%2Ff1e3hMqORnatlR3DkbIFLVC%2FxI7TvYJjKMeYwMlAONUKwJafShaty5VWqbmAv8VI5r",
+            "IsBuyBoxWinner": true,
+            "MerchantInfo": {
+              "DefaultShippingCountry": "BE",
+              "FeedbackCount": 143,
+              "FeedbackRating": 4.77,
+              "Id": "A11NA94FX7UPV6",
+              "Name": "ZW-MOTOR"
+            },
+            "Price": {
+              "Amount": 18.99,
+              "Currency": "EUR",
+              "DisplayAmount": "18,99 €"
+            },
+            "ProgramEligibility": {
+              "IsPrimeExclusive": false,
+              "IsPrimePantry": false
+            },
+            "ViolatesMAP": false
+          }
+        ],
+        "Summaries": [
+          {
+            "Condition": {
+              "Value": "New"
+            },
+            "HighestPrice": {
+              "Amount": 18.99,
+              "Currency": "EUR",
+              "DisplayAmount": "18,99 €"
+            },
+            "LowestPrice": {
+              "Amount": 18.99,
+              "Currency": "EUR",
+              "DisplayAmount": "18,99 €"
+            },
+            "OfferCount": 1
+          }
+        ]
+      },
+      "ParentASIN": "B086C3TBK2"
+    },
+    {
+      "ASIN": "B07HFCZGRS",
+      "BrowseNodeInfo": {
+        "BrowseNodes": [
+          {
+            "ContextFreeName": "Motorradreifen & Felgen",
+            "DisplayName": "Reifen & Felgen",
+            "Id": "1",
+            "IsRoot": false
+          }
+        ]
+      },
+      "DetailPageURL": "https://www.amazon.de/dp/B07HFCZGRS?tag=sjammienators&linkCode=osi&th=1&psc=1",
+      "Images": {
+        "Primary": {
+          "Large": {
+            "Height": 349,
+            "URL": "https://m.media-amazon.com/images/I/31tfRTAxmTL._SL500_.jpg",
+            "Width": 500
+          },
+          "Medium": {
+            "Height": 111,
+            "URL": "https://m.media-amazon.com/images/I/31tfRTAxmTL._SL160_.jpg",
+            "Width": 160
+          },
+          "Small": {
+            "Height": 52,
+            "URL": "https://m.media-amazon.com/images/I/31tfRTAxmTL._SL75_.jpg",
+            "Width": 75
+          }
+        },
+        "Variants": [
+          {
+            "Large": {
+              "Height": 349,
+              "URL": "https://m.media-amazon.com/images/I/311i8kn0WhL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 111,
+              "URL": "https://m.media-amazon.com/images/I/311i8kn0WhL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 52,
+              "URL": "https://m.media-amazon.com/images/I/311i8kn0WhL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 366,
+              "URL": "https://m.media-amazon.com/images/I/31Ru-9ZCIdL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 117,
+              "URL": "https://m.media-amazon.com/images/I/31Ru-9ZCIdL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 54,
+              "URL": "https://m.media-amazon.com/images/I/31Ru-9ZCIdL._SL75_.jpg",
+              "Width": 75
+            }
+          }
+        ]
+      },
+      "ItemInfo": {
+        "ByLineInfo": {
+          "Brand": {
+            "DisplayValue": "Streetparts24",
+            "Label": "Brand",
+            "Locale": "de_DE"
+          },
+          "Manufacturer": {
+            "DisplayValue": "Streetparts24",
+            "Label": "Manufacturer",
+            "Locale": "de_DE"
+          }
+        },
+        "Classifications": {
+          "ProductGroup": {
+            "DisplayValue": "KFZ-Zubehör",
+            "Label": "ProductGroup",
+            "Locale": "de_DE"
+          }
+        },
+        "ExternalIds": {
+          "EANs": {
+            "DisplayValues": [
+              "0763885351659"
+            ],
+            "Label": "EAN",
+            "Locale": "en_US"
+          },
+          "UPCs": {
+            "DisplayValues": [
+              "763885351659"
+            ],
+            "Label": "UPC",
+            "Locale": "en_US"
+          }
+        },
+        "Features": {
+          "DisplayValues": [
+            "Neues 90 Grad Winkelventil inkl. Ventilkappe in erstklassiger Qualität. Für 11,5mm Ventillöcher geeignet. Zum Einbau einfach von Innen (Reifenseite) durch die Felge stecken. Bitte überprüfen Sie vor dem Kauf, ob das Ventil für Ihr Fahrzeug passend ist. Technische Daten: - Maße: ca. 32mm / 34mm - 90 Grad Winkel Ventil",
+            "Passend für: Roller, Motorroller, Scooter, Quad, ATV, Mofa, Moped, Mokick, Enduro, Supermoto, Cross, Cafe Racer, Scrambler, Chopper, Custom Bike, Superbike, Rennmaschine, Trial, Stuntbike, Oldtimer",
+            "Zündapp C CS CX GTS ZA ZB ZD ZE ZL ZR ZS ZX Kreidler LF LF-F LH RM RMC Florett Flory Puch Cobra Imola M Mini Maxi Monza Hercules HR1 HR2 Optima Prima M 2 3 4 5 S Mofa Moped Mokick 25 50 Simson S50 S51 S70 S80 Schwalbe Star KR51",
+            "Aprilia AF1 Caponord Classic Dorsoduro ETV ETX Europa Grande Mana Moto MX MXV Pegaso Red Rose RS RS4 RST RSV RSV4 RX RXV Shiver SL SX SXV Tuareg Tuono 50 125 250 450 550 600 650 750 850 1000 1100 1200"
+          ],
+          "Label": "Features",
+          "Locale": "de_DE"
+        },
+        "ManufactureInfo": {
+          "ItemPartNumber": {
+            "DisplayValue": "SP24170918",
+            "Label": "PartNumber",
+            "Locale": "en_US"
+          }
+        },
+        "ProductInfo": {
+          "UnitCount": {
+            "DisplayValue": 1,
+            "Label": "NumberOfItems",
+            "Locale": "en_US"
+          }
+        },
+        "Title": {
+          "DisplayValue": "Alu Winkelventil 90° Reifen Ventil für Roller Scooter Mofa Moped",
+          "Label": "Title",
+          "Locale": "de_DE"
+        }
+      },
+      "Offers": {
+        "Listings": [
+          {
+            "Availability": {
+              "Message": "Auf Lager.",
+              "MinOrderQuantity": 1,
+              "Type": "Now"
+            },
+            "Condition": {
+              "SubCondition": {
+                "Value": "New"
+              },
+              "Value": "New"
+            },
+            "DeliveryInfo": {
+              "IsAmazonFulfilled": false,
+              "IsFreeShippingEligible": false,
+              "IsPrimeEligible": false
+            },
+            "Id": "L5WJ0h2ojnbg%2Fm2pwsXgrpNRxh1KEZEqYahwxx888RR8AFF5KzLepTmuVrCfTJLyDDdF%2BqAH9qR1YXcBCLSY3BbpjqmiOqEnz7t8QVc41VVDGkaStfYtzjZcwGor40aFm2EkYCMUfTfsTRHTae0unzH2KFgUiqCt",
+            "IsBuyBoxWinner": true,
+            "MerchantInfo": {
+              "DefaultShippingCountry": "DE",
+              "FeedbackCount": 939,
+              "FeedbackRating": 4.67,
+              "Id": "A33DKZAUK6T2F8",
+              "Name": "Streetparts24"
+            },
+            "Price": {
+              "Amount": 4.89,
+              "Currency": "EUR",
+              "DisplayAmount": "4,89 €"
+            },
+            "ProgramEligibility": {
+              "IsPrimeExclusive": false,
+              "IsPrimePantry": false
+            },
+            "ViolatesMAP": false
+          }
+        ],
+        "Summaries": [
+          {
+            "Condition": {
+              "Value": "New"
+            },
+            "HighestPrice": {
+              "Amount": 4.89,
+              "Currency": "EUR",
+              "DisplayAmount": "4,89 €"
+            },
+            "LowestPrice": {
+              "Amount": 4.89,
+              "Currency": "EUR",
+              "DisplayAmount": "4,89 €"
+            },
+            "OfferCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "ASIN": "B07RDB5GG2",
+      "BrowseNodeInfo": {
+        "BrowseNodes": [
+          {
+            "ContextFreeName": "Motorradreifen & Felgen",
+            "DisplayName": "Reifen & Felgen",
+            "Id": "1",
+            "IsRoot": false
+          }
+        ]
+      },
+      "DetailPageURL": "https://www.amazon.de/dp/B07RDB5GG2?tag=sjammienators&linkCode=osi&th=1&psc=1",
+      "Images": {
+        "Primary": {
+          "Large": {
+            "Height": 500,
+            "URL": "https://m.media-amazon.com/images/I/41-MrhGanpL._SL500_.jpg",
+            "Width": 500
+          },
+          "Medium": {
+            "Height": 160,
+            "URL": "https://m.media-amazon.com/images/I/41-MrhGanpL._SL160_.jpg",
+            "Width": 160
+          },
+          "Small": {
+            "Height": 75,
+            "URL": "https://m.media-amazon.com/images/I/41-MrhGanpL._SL75_.jpg",
+            "Width": 75
+          }
+        },
+        "Variants": [
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/4134nWUMogL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/4134nWUMogL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/4134nWUMogL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41dvGf2EkbL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41dvGf2EkbL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41dvGf2EkbL._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41VUV1TUx1L._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41VUV1TUx1L._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41VUV1TUx1L._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41vs1fhkF6L._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41vs1fhkF6L._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41vs1fhkF6L._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41ltcHJzK7L._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41ltcHJzK7L._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41ltcHJzK7L._SL75_.jpg",
+              "Width": 75
+            }
+          },
+          {
+            "Large": {
+              "Height": 500,
+              "URL": "https://m.media-amazon.com/images/I/41C7Z7J9imL._SL500_.jpg",
+              "Width": 500
+            },
+            "Medium": {
+              "Height": 160,
+              "URL": "https://m.media-amazon.com/images/I/41C7Z7J9imL._SL160_.jpg",
+              "Width": 160
+            },
+            "Small": {
+              "Height": 75,
+              "URL": "https://m.media-amazon.com/images/I/41C7Z7J9imL._SL75_.jpg",
+              "Width": 75
+            }
+          }
+        ]
+      },
+      "ItemInfo": {
+        "ByLineInfo": {
+          "Brand": {
+            "DisplayValue": "HIGGER",
+            "Label": "Brand",
+            "Locale": "de_DE"
+          },
+          "Manufacturer": {
+            "DisplayValue": "HIGGER",
+            "Label": "Manufacturer",
+            "Locale": "de_DE"
+          }
+        },
+        "Classifications": {
+          "ProductGroup": {
+            "DisplayValue": "KFZ-Zubehör",
+            "Label": "ProductGroup",
+            "Locale": "de_DE"
+          }
+        },
+        "ExternalIds": {
+          "EANs": {
+            "DisplayValues": [
+              "0016071023084"
+            ],
+            "Label": "EAN",
+            "Locale": "en_US"
+          },
+          "UPCs": {
+            "DisplayValues": [
+              "016071023084"
+            ],
+            "Label": "UPC",
+            "Locale": "en_US"
+          }
+        },
+        "Features": {
+          "DisplayValues": [
+            "1. Diebstahlsicherer Schnallenschlüssel aus Leder.",
+            "2. Die Reifenkappe besteht aus einer hochdichten Zinklegierung, korrosionsbeständig und wasserdicht",
+            "3.Die leichten Kappen verhindern das Austreten von Luft und verhindern, dass die Reifenkerne durch Staub, Schmutz und unerwünschte Gegenstände beschädigt werden.",
+            "4.Kann die ursprünglichen Ventilkappen des Reifens ersetzen und auch die Schönheitscharakteristik des Reifens zeigen.",
+            "5. Universalgröße passt für die meisten Autos VW Audi Toyota Honda BMW Benz usw."
+          ],
+          "Label": "Features",
+          "Locale": "de_DE"
+        },
+        "ManufactureInfo": {
+          "ItemPartNumber": {
+            "DisplayValue": "C01223",
+            "Label": "PartNumber",
+            "Locale": "en_US"
+          }
+        },
+        "ProductInfo": {
+          "Color": {
+            "DisplayValue": "Silver",
+            "Label": "Color",
+            "Locale": "de_DE"
+          }
+        },
+        "Title": {
+          "DisplayValue": "5 Teile/satz diebstahlsicherung Auto Reifen rad Ventil Vorbauten Italien Flagge Stil Luftkappen Mit leder schnalle Schlüssel Zink-legierung (Silver)",
+          "Label": "Title",
+          "Locale": "de_DE"
+        }
+      },
+      "Offers": {
+        "Listings": [
+          {
+            "Availability": {
+              "Message": "Auf Lager.",
+              "MinOrderQuantity": 1,
+              "Type": "Now"
+            },
+            "Condition": {
+              "SubCondition": {
+                "Value": "New"
+              },
+              "Value": "New"
+            },
+            "DeliveryInfo": {
+              "IsAmazonFulfilled": false,
+              "IsFreeShippingEligible": false,
+              "IsPrimeEligible": false
+            },
+            "Id": "L5WJ0h2ojnbg%2Fm2pwsXgrtXwYb3KVJs22W2%2Brgr4apa0IYvMZ5ZHegBFKuXDeFygyySR%2FFwfeGNrVEOas5A99JuMl0SXfM9xKo3HIfCJ2nhRdQ6VVLqrJeKwgGw3aQWCNCQBhqhokHD6BjgPFevP6uP0khoptcdb",
+            "IsBuyBoxWinner": true,
+            "MerchantInfo": {
+              "DefaultShippingCountry": "CN",
+              "FeedbackCount": 39,
+              "FeedbackRating": 4.07,
+              "Id": "A2P15QK1XM5DT6",
+              "Name": "HIGGER"
+            },
+            "Price": {
+              "Amount": 7.79,
+              "Currency": "EUR",
+              "DisplayAmount": "7,79 €"
+            },
+            "ProgramEligibility": {
+              "IsPrimeExclusive": false,
+              "IsPrimePantry": false
+            },
+            "ViolatesMAP": false
+          }
+        ],
+        "Summaries": [
+          {
+            "Condition": {
+              "Value": "New"
+            },
+            "HighestPrice": {
+              "Amount": 7.79,
+              "Currency": "EUR",
+              "DisplayAmount": "7,79 €"
+            },
+            "LowestPrice": {
+              "Amount": 7.79,
+              "Currency": "EUR",
+              "DisplayAmount": "7,79 €"
+            },
+            "OfferCount": 1
+          }
+        ]
+      },
+      "ParentASIN": "B07RJJFNCB"
+    }
+  ]
