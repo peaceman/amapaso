@@ -1,6 +1,6 @@
 const log = require('../../log');
 const { ApiClient } = require('../../amazon/api');
-const { Product } = require('../../database/models');
+const { Product, CategoryProductImport } = require('../../database/models');
 
 /**
  * @typedef {object} ImportCategoryProductsRequest
@@ -35,10 +35,18 @@ class ImportCategoryProducts {
     async execute(request) {
         log.info('Start importing category products', {...request});
 
+        const productImport = await CategoryProductImport.query()
+            .findById(request.categoryProductImportId)
+            .throwIfNotFound();
+
+        await productImport.markAsStarted();
+
         const gen = this.searchCategoryProducts(this.amaApiClient, request.categoryId);
         for await (const product of gen) {
             await this.tryStoreProduct(product);
         }
+
+        await productImport.markAsStopped();
 
         log.info('Finished importing categery products', {...request});
     }

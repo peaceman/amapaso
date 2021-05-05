@@ -42,6 +42,16 @@ class CategoryProductImport extends BaseModel {
             },
         };
     }
+
+    async markAsStarted() {
+        await this.$query()
+            .patch({startedAt: new Date().toISOString()});
+    }
+
+    async markAsStopped() {
+        await this.$query()
+            .patch({stoppedAt: new Date().toISOString()});
+    }
 }
 
 module.exports = CategoryProductImport;

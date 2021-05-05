@@ -156,6 +156,35 @@ describe('import category products', () => {
         });
     });
 
+    it('will mark the product import as started and stopped', async () => {
+        const amaApiClient = setupApiClient();
+
+        const [catA, catB] = await createCategories();
+        await categoryRepo.markQueuedProductsImport(catB);
+        let productImport = await catB.lastQueuedProductImport();
+
+        const searchCategoryProducts = jest.fn();
+        searchCategoryProducts.mockReturnValueOnce((async function* () {
+            return;
+        }()));
+
+        const importCategoryProducts = new ImportCategoryProducts(
+            amaApiClient,
+            searchCategoryProducts
+        );
+
+        await importCategoryProducts.execute({
+            categoryId: catB.id,
+            categoryProductImportId: productImport.id,
+        });
+
+
+        productImport = await productImport.$query();
+        expect(productImport).toBeDefined();
+        expect(productImport.startedAt).not.toBeNull();
+        expect(productImport.stoppedAt).not.toBeNull();
+    });
+
     function setupApiClient() {
         return {
             searchCategoryItems: jest.fn(),
