@@ -106,8 +106,8 @@ class CategoryRepo {
      * @param {Category} category
      */
     async markQueuedProductsImport(category) {
-        await category.$relatedQuery('productImports')
-            .insert({
+        return await category.$relatedQuery('productImports')
+            .insertAndFetch({
                 queuedAt: new Date().toISOString(),
             });
     }

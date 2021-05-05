@@ -33,13 +33,19 @@ describe('queue category products import', () => {
         categoryRepo.fetchEligibleForPeriodicProductsImport
             .mockReturnValue(Promise.resolve(categories));
 
+        categoryRepo.markQueuedProductsImport
+            .mockReturnValue({id: '1'});
+
         const queueCategoryProductsImport = new QueueImportCategoryProducts(
             categoryRepo, rateLimiter, queue
         );
 
         await queueCategoryProductsImport.execute();
         for (const category of categories) {
-            expect(queue.add).toHaveBeenCalledWith('import-category-products', { categoryId: category.id });
+            expect(queue.add).toHaveBeenCalledWith('import-category-products', {
+                categoryId: category.id,
+                categoryProductImportId: '1'
+            });
             expect(categoryRepo.markQueuedProductsImport).toHaveBeenCalledWith(category);
         }
     });

@@ -44,9 +44,11 @@ class QueueImportCategoryProducts {
         );
 
         for (const category of eligibleCategories) {
-            await this.queue.add('import-category-products', { categoryId: category.id });
-            await this.categoryRepo.markQueuedProductsImport(category);
-            log.info('Queued import-category-products', { categoryId: category.id });
+            const productImport = await this.categoryRepo.markQueuedProductsImport(category);
+            const jobData = { categoryId: category.id, categoryProductImportId: productImport.id};
+
+            await this.queue.add('import-category-products', jobData);
+            log.info('Queued import-category-products', );
         }
     }
 
