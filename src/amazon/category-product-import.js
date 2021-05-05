@@ -10,13 +10,13 @@ const { ApiClient } = require('../amazon/api');
 async function* searchCategoryProducts(apiClient, categoryId) {
     let page = 1;
 
-    while (page <= 10) {
+    while (true) {
         log.info('Fetching category products', {categoryId, page});
 
         const products = await apiClient.searchCategoryItems(categoryId, page);
         yield* products;
 
-        if (products.length === 0)
+        if (products.length === 0 || page === 10)
             break;
 
         page++;
