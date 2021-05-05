@@ -1,6 +1,6 @@
 const log = require('../../log');
 const { ApiClient } = require('../../amazon/api');
-const { Product, CategoryProductImport } = require('../../database/models');
+const { Product, CategoryProductImport, Category } = require('../../database/models');
 
 /**
  * @typedef {object} ImportCategoryProductsRequest
@@ -64,6 +64,13 @@ class ImportCategoryProducts {
 
     async storeProduct(product) {
         const productData = convertToProductData(product);
+        const existingCategoryIds = (await Category.query()
+            .select('id')
+            .whereIn('id', productData.categories?.map(({id}) => id) || []))
+            .map(c => c.id);
+
+        productData.categories = productData.categories
+            .filter(c => existingCategoryIds.includes(c.id));
 
         await Product.transaction(async trx => {
             const existingProduct = await Product.query(trx)
@@ -72,7 +79,12 @@ class ImportCategoryProducts {
                 .first();
 
             await Product.query(trx)
-                .innerJoin('product_categories')
+                .innerJoin(
+                    'product_categories',
+                    'products.asin',
+                    '=',
+                    'product_categories.product_asin'
+                )
                 .where({asin: productData.asin})
                 .forUpdate();
 
@@ -87,8 +99,10 @@ class ImportCategoryProducts {
                 await existingProduct.$relatedQuery('categories', trx)
                     .unrelate();
 
-                await existingProduct.$relatedQuery('categories', trx)
-                    .relate(productData.categories.map(({id}) => id));
+                for (const catId of productData.categories.map(({id}) => id)) {
+                    await existingProduct.$relatedQuery('categories', trx)
+                        .relate(catId);
+                }
             } else {
                 log.info('Storing new product', {asin: productData.asin});
 

@@ -123,6 +123,7 @@ describe('import category products', () => {
                 BrowseNodeInfo: {
                     BrowseNodes: [
                         {Id: '2'},
+                        {Id: '3'},
                     ],
                 },
                 Magic: false,
