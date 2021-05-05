@@ -8,7 +8,21 @@ const { ApiClient } = require('../amazon/api');
  * @returns {AsyncGenerator<object, void, void>}
  */
 async function* searchCategoryProducts(apiClient, categoryId) {
+    let page = 1;
 
+    while (page <= 10) {
+        log.info('Fetching category products', {categoryId, page});
+
+        const products = await apiClient.searchCategoryItems(categoryId, page);
+        yield* products;
+
+        if (products.length === 0)
+            break;
+
+        page++;
+    }
+
+    log.info('Finished fetching category products', {categoryId, lastFetchedPage: page});
 }
 
 module.exports = {
