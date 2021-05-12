@@ -23,6 +23,8 @@
     "objection": "^2.2.15",
     "p-retry": "^4.5.0",
     "paapi5-nodejs-sdk": "^1.1.0",
+    "socksv5": "^0.0.6",
+    "ssh2": "mscdex/ssh2",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
