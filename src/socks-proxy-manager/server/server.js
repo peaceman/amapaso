@@ -51,11 +51,7 @@ const { Client } = require('ssh2');
  * @property {SshConnectionConfig} config
  */
 
-/**
- * SortedSet at spm:connections : timestamp of last use -> connection config hash
- * SortedSet at spm:connections:${connection_config_hash} : timestamp of last use -> listener identifier
- * String at spm:listeners:${listener_identifier} : JSON of SocksListenOptions
- */
+
 class SocksProxyManagerServer {
     /**
      * @param {SocksProxyManagerServerOptions} options
