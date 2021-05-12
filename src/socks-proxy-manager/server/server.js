@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { openSshConnection } = require('./ssh');
 const { openSocksServer } = require('./socks');
 const { Client } = require('ssh2');
+const { Storage } = require('./storage');
 
 /**
  * @typedef {Object} SocksProxyManagerServerOptions
@@ -55,36 +56,39 @@ const { Client } = require('ssh2');
 class SocksProxyManagerServer {
     /**
      * @param {SocksProxyManagerServerOptions} options
-     * @param {Redis} redis
+     * @param {Storage} storage
      */
-    constructor(options, redis) {
+    constructor(options, storage) {
         this.options = options;
-        this.redis = redis;
+        this.storage = storage;
 
         this.connectionPromises = new Map();
         this.sshConnections = new Set();
         this.stopping = false;
-
-        this.run();
     }
 
     async run() {
-        const connectionInfoList = buildConnectionInfoList(this.options.ssh.connections);
-
         while (!this.stopping) {
-            const connectionPromises = connectionInfoList.map(ci => this.requestConnection(ci));
-
-            await Promise.race([
-                ...connectionPromises,
-            ]);
+            await this.runOnce();
         }
     }
 
-    stop() {
+    async runOnce() {
+        const connectionInfoList = buildConnectionInfoList(this.options.ssh.connections);
+        const connectionPromises = connectionInfoList.map(ci => this.requestConnection(ci));
+
+        await Promise.race([
+            ...connectionPromises,
+        ]);
+    }
+
+    async stop() {
         this.stopping = true;
 
         for (const connection of this.sshConnections) {
             connection.end();
+
+            await new Promise(resolve => connection.on('close', resolve));
         }
     }
 
@@ -138,11 +142,11 @@ class SocksProxyManagerServer {
 
         const listenerIdentifier = await genRandomString(8);
         try {
-            await Promise.all([
-                this.storeListenOptions(listenerIdentifier, socksListenOptions),
-                this.storeListenerForConnection(listenerIdentifier, connectionInfo.hash),
-                this.storeConnection(connectionInfo.hash),
-            ]);
+            await this.storage.storeConnection(
+                connectionInfo.hash,
+                listenerIdentifier,
+                socksListenOptions
+            );
         } catch (e) {
             log.error('Failed to store connection information', {
                 connectionInfo,
