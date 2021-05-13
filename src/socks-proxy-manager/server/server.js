@@ -114,7 +114,7 @@ class SocksProxyManagerServer {
         const closedConnection = await this.waitForClosedConnection();
 
         if (!this.stopping) {
-            await this.tryEstablishConnection(closedConnection);
+            await this.tryEstablishConnection(closedConnection, {reconnectDelay: 10});
         }
     }
 
@@ -146,15 +146,25 @@ class SocksProxyManagerServer {
     /**
      * @param {SshConnectionInfo} connectionInfo
      */
-    tryEstablishConnection(connectionInfo) {
+    tryEstablishConnection(connectionInfo, { reconnectDelay = 0} = {}) {
         // catch errors that occur during the connection establishment and use that
         // promise as initial closing promise for the connection, so that it can be
         // reopened automatically like for example if an ssh connection error occurs
         return connectionInfo.closingPromise = this.establishConnection(connectionInfo)
-            .catch(error => log.warn('Error during connection establishment', {
-                config: connectionInfo.config,
-                err: error,
-            }));
+            .catch(error => {
+                log.warn('Error during connection establishment', {
+                    config: connectionInfo.config,
+                    err: error,
+                });
+
+                if (reconnectDelay > 0) {
+                    log.info(`Wait ${reconnectDelay}s until connection retry`, {
+                        config: connectionInfo.config,
+                    });
+
+                    return new Promise(resolve => setTimeout(resolve, reconnectDelay * 1000));
+                }
+            });
     }
 
     /**
