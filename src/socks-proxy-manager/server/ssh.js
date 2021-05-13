@@ -7,7 +7,7 @@ const log = require("../../log");
 function openSshConnection(config) {
     const client = new Client();
     const readyPromise = new Promise((resolve, reject) => {
-        client.on('ready', () => {
+        client.once('ready', () => {
             log.info('Established ssh connection', {
                 config,
             });
@@ -16,11 +16,12 @@ function openSshConnection(config) {
         });
 
         client.on('error', e => {
+            log.info('open ssh connection error', {config, err: e});
             reject(e);
         });
     });
 
-    client.connect(config);
+    client.connect({...config, keepaliveInterval: 5000});
 
     let timeoutHandle;
     const timeoutPromise = new Promise((resolve, reject) => {
@@ -38,11 +39,7 @@ function openSshConnection(config) {
                     return v;
                 }),
             timeoutPromise,
-        ])
-        .finally(() => {
-            client.removeAllListeners('ready');
-            client.removeAllListeners('error');
-        });
+        ]);
 }
 
 class SshConnectionTimeoutError extends Error {

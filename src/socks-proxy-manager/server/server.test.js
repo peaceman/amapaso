@@ -280,7 +280,7 @@ describe('socks proxy manager server', () => {
         await server.start({watch: false});
 
         // assertions
-        sshConnection.emit('close');
+        sshConnection.end();
         await server.reopenClosedConnection();
 
         expect(socks.openSocksServer).toHaveBeenCalledTimes(2);
@@ -348,14 +348,14 @@ describe('socks proxy manager server', () => {
 
     function setupSshConnection() {
         const connection = new EventEmitter();
-        connection.end = jest.fn(function () { this.emit('close'); });
+        connection.end = jest.fn().mockImplementationOnce(function () { this.emit('close'); });
 
         return connection;
     }
 
     function setupSocksServer() {
         const server = new EventEmitter();
-        server.close = jest.fn(function () { this.emit('close'); });
+        server.close = jest.fn().mockImplementationOnce(function () { this.emit('close'); });
         server.address = jest.fn();
 
         return server;

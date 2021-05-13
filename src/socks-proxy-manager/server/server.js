@@ -87,17 +87,7 @@ class SocksProxyManagerServer {
         const connectionInfoList = buildConnectionInfoList(this.options.ssh.connections);
         const connectionPromises = connectionInfoList
             .map(ci => tap(ci, ci => this.connections.set(ci.hash, ci)))
-            // catch errors that occur during the connection establishment and use that
-            // promise as initial closing promise for the connection, so that it can be
-            // reopened automatically like for example if an ssh connection error occurs
-            .map(ci => tap(
-                this.establishConnection(ci),
-                p => ci.closingPromise = p
-                    .catch(error => log.warn('Error during connection establishment', {
-                        config: ci.config,
-                        error,
-                    }))
-            ));
+            .map(ci => this.tryEstablishConnection(ci));
 
         await Promise.allSettled([
             ...connectionPromises,
@@ -124,7 +114,7 @@ class SocksProxyManagerServer {
         const closedConnection = await this.waitForClosedConnection();
 
         if (!this.stopping) {
-            await this.establishConnection(closedConnection);
+            await this.tryEstablishConnection(closedConnection);
         }
     }
 
@@ -150,6 +140,20 @@ class SocksProxyManagerServer {
             .map(ci => {
                 return cleanupConnectionResources(ci)
                     .then(() => ci.closingPromise);
+            }));
+    }
+
+    /**
+     * @param {SshConnectionInfo} connectionInfo
+     */
+    tryEstablishConnection(connectionInfo) {
+        // catch errors that occur during the connection establishment and use that
+        // promise as initial closing promise for the connection, so that it can be
+        // reopened automatically like for example if an ssh connection error occurs
+        return connectionInfo.closingPromise = this.establishConnection(connectionInfo)
+            .catch(error => log.warn('Error during connection establishment', {
+                config: connectionInfo.config,
+                err: error,
             }));
     }
 
@@ -197,6 +201,8 @@ class SocksProxyManagerServer {
                     config: connectionInfo.config,
                 });
 
+                delete connectionInfo.sshConnection;
+
                 resolve();
             });
 
@@ -204,6 +210,8 @@ class SocksProxyManagerServer {
                 log.info('Socks server closed', {
                     config: connectionInfo.config,
                 });
+
+                delete connectionInfo.socksServer;
 
                 this.storage.removeListener(listenerIdentifier);
                 resolve();
