@@ -57,6 +57,20 @@ class Storage {
     }
 
     /**
+     * @returns {{listen: import("./server/server").SocksListenOptions, connectionConfigHash: string}}
+     */
+    async getLRUConnection() {
+        // todo implement
+    }
+
+    /**
+     * @param {string} connectionConfigHash
+     */
+    async penalizeConnection(connectionConfigHash) {
+        // todo implement
+    }
+
+    /**
      * @param {string} key
      * @returns {string}
      */
