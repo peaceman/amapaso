@@ -128,7 +128,13 @@ class Storage {
      * @param {string} connectionConfigHash
      */
     async penalizeConnection(connectionConfigHash) {
-        // todo implement
+        await this.redis.zadd(
+            this.key('connections'),
+            'XX',
+            'INCR',
+            10 * 1000,
+            connectionConfigHash
+        );
     }
 
     /**

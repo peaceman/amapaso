@@ -275,6 +275,24 @@ describe('storage', () => {
         });
     });
 
+    it('penalizes connections', async () => {
+        const redis = setupRedis();
+        const storage = new Storage(redis);
+
+        const connectionConfigHash = 'cch';
+
+        await storage.penalizeConnection(connectionConfigHash);
+
+        expect(redis.zadd)
+            .toHaveBeenCalledWith(
+                `spm:connections`,
+                'XX',
+                'INCR',
+                10 * 1000,
+                connectionConfigHash
+            );
+    });
+
     function setupRedis() {
         return {
             expire: jest.fn(),
