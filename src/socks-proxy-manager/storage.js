@@ -1,3 +1,5 @@
+const log = require("../log");
+
 /**
  * SortedSet at spm:connections : timestamp of last use -> connection config hash
  * SortedSet at spm:connections:${connection_config_hash} : timestamp of last use -> listener identifier
@@ -57,10 +59,69 @@ class Storage {
     }
 
     /**
-     * @returns {{listen: import("./server/server").SocksListenOptions, connectionConfigHash: string}}
+     * @returns {{listen: import("./server/server").SocksListenOptions, connectionConfigHash: string}|undefined}
      */
     async getLRUConnection() {
-        // todo implement
+        try {
+            const [connectionConfigHash] = await this.redis.zrange(this.key('connections'), 0, 1);
+            if (connectionConfigHash === undefined) return;
+
+            // update score of the connection
+            await this.updateScore(this.key('connections'), connectionConfigHash);
+
+            const [listenerIdentifier] = await this.redis.zrange(
+                this.key(`connections:${connectionConfigHash}`),
+                0, 1
+            );
+
+            // remove connection from sorted set if it is empty
+            if (listenerIdentifier === undefined) {
+                await this.redis.zrem(
+                    this.key('connections'),
+                    connectionConfigHash
+                );
+
+                return;
+            }
+
+            // update score of the listener
+            await this.updateScore(this.key(`connections:${connectionConfigHash}`), listenerIdentifier);
+
+            const listenOptionsJson = await this.redis.get(this.key(`listeners:${listenerIdentifier}`));
+
+            // remove listener from sorted set if it does not exist
+            if (listenOptionsJson === null) {
+                await this.redis.zrem(
+                    this.key(`connections:${connectionConfigHash}`),
+                    listenerIdentifier
+                );
+
+                return;
+            }
+
+            return {
+                listen: JSON.parse(listenOptionsJson),
+                connectionConfigHash,
+            };
+        } catch (e) {
+            log.error('An error occurred during get lru connection', {err: e});
+            return undefined;
+        }
+    }
+
+    /**
+     * @private
+     * @param {string} key
+     * @param {string} item
+     * @param {*} options
+     */
+    async updateScore(key, item, { score = Date.now() } = {}) {
+        await this.redis.zadd(
+            key,
+            'GT',
+            score,
+            item
+        );
     }
 
     /**
