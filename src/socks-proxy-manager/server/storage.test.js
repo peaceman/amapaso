@@ -62,6 +62,19 @@ describe('storage', () => {
         );
     });
 
+    it('removes listeners', async () => {
+        const redis = setupRedis();
+        const storage = new Storage(redis);
+
+        const listenerIdentifier = 'listener-identifier';
+
+        await storage.removeListener(listenerIdentifier);
+
+        expect(redis.del).toHaveBeenCalledWith(
+            `spm:listeners:${listenerIdentifier}`
+        );
+    });
+
     it('uses the configured expiry', async () => {
         const redis = setupRedis();
 
@@ -100,6 +113,7 @@ describe('storage', () => {
             set: jest.fn(),
             zadd: jest.fn(),
             expire: jest.fn(),
+            del: jest.fn(),
         };
     }
 });

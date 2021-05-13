@@ -142,6 +142,33 @@ describe('socks proxy manager server', () => {
         expect(socksServer.close).toHaveBeenCalled();
     });
 
+    it('removes listener from storage after connection closing', async () => {
+        const storage = setupStorage();
+        const sshConnection = setupSshConnection();
+
+        ssh.openSshConnection.mockReturnValueOnce(sshConnection);
+
+        const socksServer = setupSocksServer();
+        socksServer.close.mockImplementation(function () { this.emit('close'); });
+        socks.openSocksServer.mockReturnValueOnce(socksServer);
+        socksServer.address.mockReturnValueOnce({port: 44});
+
+        storage.refreshListener.mockReturnValue(Promise.resolve());
+
+        jest.useFakeTimers();
+
+        // exec
+        const server = new SocksProxyManagerServer(proxyManagerOptions, storage);
+        await server.start({watch: false});
+
+        // assertions
+
+        sshConnection.emit('close');
+        await server.waitForClosedConnection();
+
+        expect(storage.removeListener).toHaveBeenCalledWith(expect.any(String));
+    });
+
     it('closes ssh connection after ssh connection error', async () => {
         const storage = setupStorage();
         const sshConnection = setupSshConnection();
@@ -275,13 +302,11 @@ describe('socks proxy manager server', () => {
     it('stop closes connections and doesnt reopen them', async () => {
         const storage = setupStorage();
         const sshConnection = setupSshConnection();
-        sshConnection.end.mockImplementation(function () { this.emit('close'); });
         ssh.openSshConnection.mockReturnValue(sshConnection);
 
         const socksServer = setupSocksServer();
         socks.openSocksServer.mockReturnValue(socksServer);
         socksServer.address.mockReturnValueOnce({port: 44});
-        socksServer.close.mockImplementation(function () { this.emit('close'); });
 
         storage.refreshListener.mockResolvedValue();
 
@@ -317,19 +342,20 @@ describe('socks proxy manager server', () => {
         return {
             storeConnection: jest.fn(),
             refreshListener: jest.fn(),
+            removeListener: jest.fn(),
         };
     }
 
     function setupSshConnection() {
         const connection = new EventEmitter();
-        connection.end = jest.fn();
+        connection.end = jest.fn(function () { this.emit('close'); });
 
         return connection;
     }
 
     function setupSocksServer() {
         const server = new EventEmitter();
-        server.close = jest.fn();
+        server.close = jest.fn(function () { this.emit('close'); });
         server.address = jest.fn();
 
         return server;

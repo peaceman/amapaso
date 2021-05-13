@@ -138,7 +138,7 @@ class SocksProxyManagerServer {
         const closedConnection = await Promise.race(promises);
         log.info('Detected closed connection', {config: closedConnection.config});
 
-        cleanupConnectionResources(closedConnection);
+        await cleanupConnectionResources(closedConnection);
 
         return closedConnection;
     }
@@ -148,8 +148,8 @@ class SocksProxyManagerServer {
 
         await Promise.allSettled([...this.connections.values()]
             .map(ci => {
-                cleanupConnectionResources(ci);
-                return ci.closingPromise;
+                return cleanupConnectionResources(ci)
+                    .then(() => ci.closingPromise);
             }));
     }
 
@@ -205,6 +205,7 @@ class SocksProxyManagerServer {
                     config: connectionInfo.config,
                 });
 
+                this.storage.removeListener(listenerIdentifier);
                 resolve();
             });
         });
@@ -301,8 +302,17 @@ function setupSocksSshForward(socksServer, sshConnection) {
 /**
 * @param {SshConnectionInfo} connectionInfo
 */
-function cleanupConnectionResources(connectionInfo) {
+async function cleanupConnectionResources(connectionInfo) {
    const logCtx = {config: connectionInfo.config};
+
+   const closePromises = [
+       connectionInfo.socksServer
+        ? new Promise(resolve => connectionInfo.socksServer.once('close', () => resolve()))
+        : Promise.resolve(),
+        connectionInfo.sshConnection
+        ? new Promise(resolve => connectionInfo.sshConnection.once('close', () => resolve()))
+        : Promise.resolve(),
+   ];
 
    if (connectionInfo.socksServer) {
        log.info('Closing socks server', logCtx);
@@ -315,6 +325,8 @@ function cleanupConnectionResources(connectionInfo) {
        connectionInfo.sshConnection.end();
        delete connectionInfo.sshConnection;
    }
+
+   await Promise.allSettled(closePromises);
 }
 
 module.exports = {

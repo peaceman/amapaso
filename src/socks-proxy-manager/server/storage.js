@@ -50,6 +50,12 @@ class Storage {
         );
     }
 
+    async removeListener(listenerIdentifier) {
+        await this.redis.del(
+            this.key(`listeners:${listenerIdentifier}`)
+        );
+    }
+
     /**
      * @param {string} key
      * @returns {string}
