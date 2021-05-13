@@ -5,7 +5,10 @@ const crypto = require('crypto');
 const { openSshConnection } = require('./ssh');
 const { openSocksServer } = require('./socks');
 const { Client } = require('ssh2');
+const ssh2 = require('ssh2');
+const socks = require('socksv5');
 const { Storage } = require('./storage');
+const { tap } = require('lodash');
 
 /**
  * @typedef {Object} SocksProxyManagerServerOptions
@@ -50,8 +53,10 @@ const { Storage } = require('./storage');
  * @typedef {Object} SshConnectionInfo
  * @property {string} hash
  * @property {SshConnectionConfig} config
+ * @property {ssh2.Client|undefined} sshConnection
+ * @property {socks.Server|undefined} socksServer
+ * @property {Promise<any>} closingPromise
  */
-
 
 class SocksProxyManagerServer {
     /**
@@ -62,180 +67,164 @@ class SocksProxyManagerServer {
         this.options = options;
         this.storage = storage;
 
-        this.connectionPromises = new Map();
-        this.sshConnections = new Set();
+        /** @type {Map<string, SshConnectionInfo>} */
+        this.connections = new Map();
         this.stopping = false;
     }
 
-    async run() {
-        while (!this.stopping) {
-            await this.runOnce();
+    async start({ watch = true } = {}) {
+        await this.establishConnections();
+
+        if (watch) {
+            this.watchConnections();
         }
     }
 
-    async runOnce() {
+    /**
+     * @private
+     */
+    async establishConnections() {
         const connectionInfoList = buildConnectionInfoList(this.options.ssh.connections);
-        const connectionPromises = connectionInfoList.map(ci => this.requestConnection(ci));
+        const connectionPromises = connectionInfoList
+            .map(ci => tap(ci, ci => this.connections.set(ci.hash, ci)))
+            // catch errors that occur during the connection establishment and use that
+            // promise as initial closing promise for the connection, so that it can be
+            // reopened automatically like for example if an ssh connection error occurs
+            .map(ci => tap(
+                this.establishConnection(ci),
+                p => ci.closingPromise = p
+                    .catch(error => log.warn('Error during connection establishment', {
+                        config: ci.config,
+                        error,
+                    }))
+            ));
 
-        await Promise.race([
+        await Promise.allSettled([
             ...connectionPromises,
         ]);
+    }
+
+    /**
+     * @private
+     */
+    async watchConnections() {
+        log.info('Start watching connections');
+
+        while (!this.stopping) {
+            await this.reopenClosedConnection();
+        }
+
+        log.info('Stop watching connections');
+    }
+
+    /**
+     * @private
+     */
+    async reopenClosedConnection() {
+        const closedConnection = await this.waitForClosedConnection();
+
+        if (!this.stopping) {
+            await this.establishConnection(closedConnection);
+        }
+    }
+
+    /**
+     * @private
+     */
+    async waitForClosedConnection() {
+        const promises = [...this.connections.values()]
+            .map(ci => ci.closingPromise.then(() => ci));
+
+        const closedConnection = await Promise.race(promises);
+        log.info('Detected closed connection', {config: closedConnection.config});
+
+        cleanupConnectionResources(closedConnection);
+
+        return closedConnection;
     }
 
     async stop() {
         this.stopping = true;
 
-        for (const connection of this.sshConnections) {
-            connection.end();
-
-            await new Promise(resolve => connection.on('close', resolve));
-        }
-    }
-
-    /**
-     * @param {SshConnectionInfo} connectionInfo
-     */
-    requestConnection(connectionInfo) {
-        if (this.connectionPromises.has(connectionInfo.hash)) {
-            return this.connectionPromises.get(connectionInfo.hash);
-        }
-
-        const storeConnectionPromise = p => this.connectionPromises.set(connectionInfo.hash, p);
-        const clearConnectionPromise = () => this.connectionPromises.delete(connectionInfo.hash);
-
-        const connectionPromise = this.establishConnection(connectionInfo);
-
-        storeConnectionPromise(connectionPromise);
-
-        return connectionPromise
-            .finally(() => clearConnectionPromise());
+        await Promise.allSettled([...this.connections.values()]
+            .map(ci => {
+                cleanupConnectionResources(ci);
+                return ci.closingPromise;
+            }));
     }
 
     /**
      * @param {SshConnectionInfo} connectionInfo
      */
     async establishConnection(connectionInfo) {
-        let sshConnection;
-        try {
-            sshConnection = await openSshConnection(connectionInfo.config);
-        } catch (e) {
-            log.warn('Failed to open ssh connection', {
-                connectionInfo,
-                error: e,
-            });
+        log.info('Establishing connection', {config: connectionInfo.config});
+        const sshConnection = (connectionInfo.sshConnection = await openSshConnection(
+            connectionInfo.config
+        ));
 
-            // delay further connection attempts
-            return new Promise(resolve => setTimeout(resolve, 15 * 1000));
-        }
-
-        const socksServer = await openSocksServer(
+        const socksServer = (connectionInfo.socksServer = await openSocksServer(
             this.options.socks.listen.host,
             this.options.socks.auth
-        );
-
-        const socksListenOptions = {
-            ...this.options.socks.listen,
-            port: socksServer.address().port,
-        };
+        ));
 
         setupSocksSshForward(socksServer, sshConnection);
 
         const listenerIdentifier = await genRandomString(8);
-        try {
-            await this.storage.storeConnection(
-                connectionInfo.hash,
-                listenerIdentifier,
-                socksListenOptions
-            );
-        } catch (e) {
-            log.error('Failed to store connection information', {
-                connectionInfo,
-                listenerIdentifier,
-                error: e,
-            });
+        await this.storage.storeConnection(
+            connectionInfo.hash,
+            listenerIdentifier,
+            {
+                ...this.options.socks.listen,
+                port: socksServer.address().port,
+            }
+        );
 
-            sshConnection.end();
-            socksServer.close();
+        const refreshListenerInterval = this.setupRefreshListener(listenerIdentifier);
 
-            return Promise.resolve();
-        }
-
-        const refreshListenOptionsInterval = this.setupRefreshListenOptions(listenerIdentifier);
-
-        const connectionPromise = new Promise((resolve, reject) => {
+        const closingPromise = new Promise((resolve, reject) => {
             // disconnect the ssh connection and socks listener on errors
             sshConnection.on('error', error => {
                 log.warn('SSH connection error', {
-                    connectionInfo,
+                    config: connectionInfo.config,
                     error,
                 });
 
-                sshConnection.end();
-                socksServer.close();
+                resolve();
             });
 
             sshConnection.on('close', () => {
                 log.info('SSH connection closed', {
-                    connectionInfo,
+                    config: connectionInfo.config,
                 });
 
-                socksServer.close();
-                this.sshConnections.delete(sshConnection);
                 resolve();
             });
 
             socksServer.on('close', () => {
                 log.info('Socks server closed', {
-                    socksListenOptions,
+                    config: connectionInfo.config,
                 });
 
-                sshConnection.end();
-                clearInterval(refreshListenOptionsInterval);
+                resolve();
             });
         });
 
-        this.sshConnections.add(sshConnection);
-        await connectionPromise;
+        connectionInfo.closingPromise = closingPromise
+            .finally(() => {
+                const logCtx = {config: connectionInfo.config};
+                log.info('Clearing refresh interval', logCtx);
+                clearInterval(refreshListenerInterval)
+            });
     }
 
     /**
      * @param {string} listenerIdentifier
-     * @param {SocksListenOptions} socksListenOptions
      */
-    async storeListenOptions(listenerIdentifier, socksListenOptions) {
-        await this.redis.set(
-            `spm:listeners:${listenerIdentifier}`,
-            JSON.stringify(socksListenOptions),
-            'EX',
-            10
-        );
-    }
-
-    /**
-     * @param {string} listenerIdentifier
-     * @param {string} connectionConfigHash
-     */
-    async storeListenerForConnection(listenerIdentifier, connectionConfigHash) {
-        const setKey = `spm:connections:${connectionConfigHash}`;
-
-        await this.redis.zadd(setKey, 'NX', Date.now(), listenerIdentifier);
-    }
-
-    /**
-     * @param {string} connectionConfigHash
-     */
-    async storeConnection(connectionConfigHash) {
-        await this.redis.zadd('spm:connections', 'NX', Date.now(), connectionConfigHash);
-    }
-
-    async refreshListenOptionsTtl(listenerIdentifier) {
-        await this.redis.expire(`spm:listeners:${listenerIdentifier}`, 10);
-    }
-
-    setupRefreshListenOptions(listenerIdentifier) {
+    setupRefreshListener(listenerIdentifier) {
         return setInterval(
             () => {
-                this.refreshListenOptionsTtl(listenerIdentifier)
+                log.info('Refresh listener', {listenerIdentifier});
+                this.storage.refreshListener(listenerIdentifier)
                     .catch(e => {
                         log.warn(
                             'Failed to refresh listen options ttl',
@@ -260,6 +249,7 @@ function buildConnectionInfoList(connections) {
                     .update(JSON.stringify(c))
                     .digest('hex'),
                 config: c,
+                closingPromise: undefined,
             };
         });
 }
@@ -306,6 +296,25 @@ function setupSocksSshForward(socksServer, sshConnection) {
             }
         );
     });
+}
+
+/**
+* @param {SshConnectionInfo} connectionInfo
+*/
+function cleanupConnectionResources(connectionInfo) {
+   const logCtx = {config: connectionInfo.config};
+
+   if (connectionInfo.socksServer) {
+       log.info('Closing socks server', logCtx);
+       connectionInfo.socksServer.close();
+       delete connectionInfo.socksServer;
+   }
+
+   if (connectionInfo.sshConnection) {
+       log.info('Closing ssh connection', logCtx);
+       connectionInfo.sshConnection.end();
+       delete connectionInfo.sshConnection;
+   }
 }
 
 module.exports = {
