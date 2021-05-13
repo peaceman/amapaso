@@ -273,6 +273,33 @@ describe('storage', () => {
 
             expect(connection).not.toBeDefined();
         });
+
+        it('returns the first existing listener', async () => {
+            const redis = setupRedis();
+            const storage = new Storage(redis);
+
+            const connectionConfigHash = 'cch';
+
+            redis.zrange
+                .mockReturnValueOnce([connectionConfigHash])
+                .mockReturnValueOnce(['first'])
+                .mockReturnValueOnce([connectionConfigHash])
+                .mockReturnValueOnce(['second']);
+
+            redis.get
+                .mockReturnValueOnce(null)
+                .mockReturnValueOnce(JSON.stringify({foo: 'bar'}));
+
+            const connection = await storage.getLRUConnection();
+
+            expect(connection).toBeDefined();
+
+            expect(redis.zrem)
+                .toHaveBeenCalledWith(`spm:connections:${connectionConfigHash}`, 'first');
+
+            expect(redis.get).toHaveBeenCalledWith(`spm:listeners:first`);
+            expect(redis.get).toHaveBeenCalledWith(`spm:listeners:second`);
+        });
     });
 
     it('penalizes connections', async () => {

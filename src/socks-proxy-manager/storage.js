@@ -63,46 +63,51 @@ class Storage {
      */
     async getLRUConnection() {
         try {
-            const [connectionConfigHash] = await this.redis.zrange(this.key('connections'), 0, 1);
-            if (connectionConfigHash === undefined) return;
+            while (true) {
+                const [connectionConfigHash] = await this.redis.zrange(this.key('connections'), 0, 1);
+                if (connectionConfigHash === undefined) return;
 
-            // update score of the connection
-            await this.updateScore(this.key('connections'), connectionConfigHash);
+                // update score of the connection
+                await this.updateScore(this.key('connections'), connectionConfigHash);
 
-            const [listenerIdentifier] = await this.redis.zrange(
-                this.key(`connections:${connectionConfigHash}`),
-                0, 1
-            );
-
-            // remove connection from sorted set if it is empty
-            if (listenerIdentifier === undefined) {
-                await this.redis.zrem(
-                    this.key('connections'),
-                    connectionConfigHash
-                );
-
-                return;
-            }
-
-            // update score of the listener
-            await this.updateScore(this.key(`connections:${connectionConfigHash}`), listenerIdentifier);
-
-            const listenOptionsJson = await this.redis.get(this.key(`listeners:${listenerIdentifier}`));
-
-            // remove listener from sorted set if it does not exist
-            if (listenOptionsJson === null) {
-                await this.redis.zrem(
+                const [listenerIdentifier] = await this.redis.zrange(
                     this.key(`connections:${connectionConfigHash}`),
-                    listenerIdentifier
+                    0, 1
                 );
 
-                return;
-            }
+                // remove connection from sorted set if it is empty
+                if (listenerIdentifier === undefined) {
+                    log.info('Remove non existent connection', {connectionConfigHash});
+                    await this.redis.zrem(
+                        this.key('connections'),
+                        connectionConfigHash
+                    );
 
-            return {
-                listen: JSON.parse(listenOptionsJson),
-                connectionConfigHash,
-            };
+                    continue;
+                }
+
+                // update score of the listener
+                await this.updateScore(this.key(`connections:${connectionConfigHash}`), listenerIdentifier);
+
+                const listenOptionsJson = await this.redis.get(this.key(`listeners:${listenerIdentifier}`));
+
+                // remove listener from sorted set if it does not exist
+                if (listenOptionsJson === null) {
+                    log.info('Remove non existent listener from connection', {listenerIdentifier, connectionConfigHash});
+
+                    await this.redis.zrem(
+                        this.key(`connections:${connectionConfigHash}`),
+                        listenerIdentifier
+                    );
+
+                    continue;
+                }
+
+                return {
+                    listen: JSON.parse(listenOptionsJson),
+                    connectionConfigHash,
+                };
+            }
         } catch (e) {
             log.error('An error occurred during get lru connection', {err: e});
             return undefined;
