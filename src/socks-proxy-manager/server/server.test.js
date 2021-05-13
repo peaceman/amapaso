@@ -6,8 +6,7 @@ const EventEmitter = require('events');
 const crypto = require('crypto');
 const { tap } = require('lodash');
 jest.mock('./ssh');
-        jest.mock('./socks');
-
+jest.mock('./socks');
 
 describe('socks proxy manager server', () => {
     afterEach(() => {
@@ -135,7 +134,6 @@ describe('socks proxy manager server', () => {
         await server.start({watch: false});
 
         // assertions
-
         sshConnection.emit('close');
         await server.waitForClosedConnection();
 
@@ -162,7 +160,6 @@ describe('socks proxy manager server', () => {
         await server.start({watch: false});
 
         // assertions
-
         sshConnection.emit('close');
         await server.waitForClosedConnection();
 
@@ -318,7 +315,6 @@ describe('socks proxy manager server', () => {
         await server.stop();
 
         // assertions
-
         expect(socks.openSocksServer).toHaveBeenCalledTimes(1);
         expect(socks.openSocksServer).toHaveBeenCalledWith(
             proxyManagerOptions.socks.listen.host,
