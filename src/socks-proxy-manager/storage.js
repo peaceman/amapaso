@@ -12,7 +12,7 @@ class Storage {
     /**
      * @param {string} connectionConfigHash
      * @param {string} listenerIdentifier
-     * @param {import("./server").SocksListenOptions} socksListenOptions
+     * @param {import("./server/server").SocksListenOptions} socksListenOptions
      */
     async storeConnection(connectionConfigHash, listenerIdentifier, socksListenOptions) {
         // store listener options

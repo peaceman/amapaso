@@ -7,7 +7,7 @@ const { openSocksServer } = require('./socks');
 const { Client } = require('ssh2');
 const ssh2 = require('ssh2');
 const socks = require('socksv5');
-const { Storage } = require('./storage');
+const { Storage } = require('../storage');
 const { tap } = require('lodash');
 
 /**
@@ -17,7 +17,7 @@ const { tap } = require('lodash');
  */
 
 /**
- * @typedef {Object} SocksOptions
+ * @typedef {Object} SocksOptionsw
  * @property {SocksListenOptions} listen
  * @property {SocksAuthOptions} auth
  */
