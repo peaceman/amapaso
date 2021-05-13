@@ -17,7 +17,7 @@ const { tap } = require('lodash');
  */
 
 /**
- * @typedef {Object} SocksOptionsw
+ * @typedef {Object} SocksOptions
  * @property {SocksListenOptions} listen
  * @property {SocksAuthOptions} auth
  */

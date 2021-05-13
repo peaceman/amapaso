@@ -9,6 +9,7 @@
   "author": "nixalio@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.21.1",
     "bullmq": "^1.24.0",
     "bunyan": "^1.8.15",
     "config": "^3.3.6",
@@ -23,6 +24,7 @@
     "objection": "^2.2.15",
     "p-retry": "^4.5.0",
     "paapi5-nodejs-sdk": "^1.1.0",
+    "socks-proxy-agent": "^5.0.0",
     "socksv5": "^0.0.6",
     "ssh2": "mscdex/ssh2",
     "yargs": "^16.2.0"

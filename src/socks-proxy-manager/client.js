@@ -1,13 +1,19 @@
-const socks = require('socksv5');
 const log = require('../log');
+const { SocksProxyAgent } = require('socks-proxy-agent');
 
 const CONNECTION_CONFIG_HASH = Symbol('listener identifier');
 
+/**
+ * @typedef {Object} SocksProxyManagerClientOptions
+ * @property {import('./server/server').SocksAuthOptions} auth
+ */
 class SocksProxyManagerClient {
     /**
      * @param {import('./storage').Storage} storage
      */
-    constructor(storage) {
+    constructor(options, storage) {
+        /** @type {SocksProxyManagerClientOptions} */
+        this.options = options;
         /** @type {import('./storage').Storage} */
         this.storage = storage;
     }
@@ -19,9 +25,15 @@ class SocksProxyManagerClient {
             return;
         }
 
+        const agent = new SocksProxyAgent({
+            ...socksConnection.listen,
+            userId: this.options.auth.username,
+            password: this.options.auth.password,
+        });
+
         return {
-            httpAgent: new socks.HttpAgent(socksConnection.listen),
-            httpsAgent: new socks.HttpsAgent(socksConnection.listen),
+            httpAgent: agent,
+            httpsAgent: agent,
             [CONNECTION_CONFIG_HASH]: socksConnection.connectionConfigHash,
         };
     }

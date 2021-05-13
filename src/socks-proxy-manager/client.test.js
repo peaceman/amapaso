@@ -1,12 +1,15 @@
 const { SocksProxyManagerClient } = require("./client");
-const socks = require('socksv5');
+const { SocksProxyAgent } = require('socks-proxy-agent');
 
-jest.mock('socksv5');
+jest.mock('socks-proxy-agent');
 
 describe('socks proxy manager client', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
+
+    const socksAuthOptions = {username: 'foo', password: 'bar'};
+    const clientOptions = {auth: socksAuthOptions};
 
     it('fetches http agents', async () => {
         const storage = setupStorage();
@@ -16,24 +19,30 @@ describe('socks proxy manager client', () => {
             connectionConfigHash: 'cch'
         });
 
-        const client = new SocksProxyManagerClient(storage);
+        const client = new SocksProxyManagerClient(clientOptions, storage);
         const agents = await client.getNextHttpAgents();
 
         expect(agents).toBeDefined();
         expect(agents).toMatchObject({
-            httpAgent: expect.any(socks.HttpAgent),
-            httpsAgent: expect.any(socks.HttpsAgent),
+            httpAgent: expect.any(SocksProxyAgent),
+            httpsAgent: expect.any(SocksProxyAgent),
         });
 
-        expect(socks.HttpAgent).toHaveBeenCalledWith(listen);
-        expect(socks.HttpsAgent).toHaveBeenCalledWith(listen);
+        const socksConfig = {
+            ...listen,
+            userId: socksAuthOptions.username,
+            password: socksAuthOptions.password,
+        };
+
+        expect(SocksProxyAgent).toHaveBeenCalledWith(socksConfig);
+        expect(SocksProxyAgent).toHaveBeenCalledWith(socksConfig);
     });
 
     it('will return undefined if the storage doesnt have a connection', async () => {
         const storage = setupStorage();
         storage.getLRUConnection.mockReturnValueOnce(undefined);
 
-        const client = new SocksProxyManagerClient(storage);
+        const client = new SocksProxyManagerClient(clientOptions, storage);
         const agents = await client.getNextHttpAgents();
 
         expect(agents).not.toBeDefined();
@@ -46,7 +55,7 @@ describe('socks proxy manager client', () => {
             connectionConfigHash: 'cch',
         });
 
-        const client = new SocksProxyManagerClient(storage);
+        const client = new SocksProxyManagerClient(clientOptions, storage);
         const agents = await client.getNextHttpAgents();
         await client.reportBlockedRequest(agents);
 
