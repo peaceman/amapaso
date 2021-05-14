@@ -26,6 +26,8 @@ class Product extends BaseModel {
 
     static get relationMappings() {
         const Category = require('./Category');
+        const ProductReview = require('./ProductReview');
+        const ProductReviewImport = require('./ProductReviewImport');
 
         return {
             categories: {
@@ -54,6 +56,22 @@ class Product extends BaseModel {
                 join: {
                     from: 'products.asin',
                     to: 'products.parent_asin',
+                },
+            },
+            reviews: {
+                relation: Model.HasManyRelation,
+                modelClass: ProductReview,
+                join: {
+                    from: 'product.asin',
+                    to: 'product_reviews.product_asin',
+                },
+            },
+            reviewImports: {
+                relation: Model.HasManyRelation,
+                modelClass: ProductReviewImport,
+                join: {
+                    from: 'product.asin',
+                    to: 'product_review_imports.product_asin',
                 },
             },
         };
