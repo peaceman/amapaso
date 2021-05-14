@@ -62,7 +62,7 @@ class Product extends BaseModel {
                 relation: Model.HasManyRelation,
                 modelClass: ProductReview,
                 join: {
-                    from: 'product.asin',
+                    from: 'products.asin',
                     to: 'product_reviews.product_asin',
                 },
             },
@@ -70,7 +70,7 @@ class Product extends BaseModel {
                 relation: Model.HasManyRelation,
                 modelClass: ProductReviewImport,
                 join: {
-                    from: 'product.asin',
+                    from: 'products.asin',
                     to: 'product_review_imports.product_asin',
                 },
             },
