@@ -10,7 +10,7 @@ describe('import category products', () => {
 
     beforeAll(async () => {
         db = await createDatabase();
-        Model.knex(db);
+        Model.knex(db.knex);
     });
 
     afterAll(async () => {

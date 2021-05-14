@@ -9,7 +9,7 @@ describe('category repo integration tests', () => {
 
     beforeAll(async () => {
         db = await createDatabase();
-        Model.knex(db);
+        Model.knex(db.knex);
     });
 
     afterAll(async () => {

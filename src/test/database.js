@@ -1,7 +1,6 @@
 const Knex = require('knex');
 const config = require('config');
-
-const databaseName = `amapaso_test_${process.env.JEST_WORKER_ID}`;
+const crypto = require('crypto');
 
 function openConnection(databaseName = undefined) {
     return Knex({
@@ -19,6 +18,7 @@ function openConnection(databaseName = undefined) {
 }
 
 async function createDatabase() {
+    const databaseName = `amapaso_test_${process.env.JEST_WORKER_ID}_${getRndDbNameSuffix()}`;
     let knex = openConnection();
 
     console.log(`creating database ${databaseName}, dropping if it already exists`);
@@ -30,16 +30,16 @@ async function createDatabase() {
     console.log(`migrating database ${databaseName}`);
     await knex.migrate.latest();
 
-    return knex;
+    return {name: databaseName, knex};
 }
 
-async function dropDatabase(knex) {
+async function dropDatabase({name: databaseName, knex}) {
     console.log(`dropping database ${databaseName}`);
     await knex.raw(`drop database\`${databaseName}\``);
     await knex.destroy();
 }
 
-async function truncateDatabase(knex) {
+async function truncateDatabase({name: databaseName, knex}) {
     const tables = await fetchTableNames(knex);
 
     await knex.raw('set foreign_key_checks = 0');
@@ -57,6 +57,11 @@ async function fetchTableNames(knex) {
     return (tables[0] || [])
         .map(row => Object.values(row))
         .flat();
+}
+
+function getRndDbNameSuffix() {
+    return crypto.randomBytes(2)
+        .toString('hex');
 }
 
 module.exports = {
