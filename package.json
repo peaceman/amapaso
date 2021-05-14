@@ -12,6 +12,7 @@
     "axios": "^0.21.1",
     "bullmq": "^1.24.0",
     "bunyan": "^1.8.15",
+    "cheerio": "*",
     "config": "^3.3.6",
     "csv-parse": "^4.15.4",
     "date-fns": "^2.21.1",

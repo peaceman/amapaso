@@ -1,4 +1,5 @@
 const { searchCategoryProducts } = require('./category-product-import');
+const { unrollAsyncIterator } = require('../utils');
 
 describe('search category products', () => {
     it('passes the given category id', async () => {
@@ -68,13 +69,3 @@ describe('search category products', () => {
         }
     });
 });
-
-async function unrollAsyncIterator(iter) {
-    const values = [];
-
-    for await (const v of iter) {
-        values.push(v);
-    }
-
-    return values;
-}
