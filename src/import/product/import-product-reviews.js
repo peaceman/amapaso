@@ -1,7 +1,7 @@
 const log = require('../../log');
 const { ProductReviewFetcher } = require('../../amazon/product-review-fetcher');
 const ProductReview = require('../../database/models/ProductReview');
-const { raw, UniqueViolationError } = require('objection');
+const { raw, UniqueViolationError, ValidationError } = require('objection');
 const { formatISO9075 } = require('date-fns');
 const ProductReviewImport = require('../../database/models/ProductReviewImport');
 
@@ -49,6 +49,15 @@ class ImportProductReviews {
      * @param {import('../../amazon/product-review-fetcher').ProductReviewData} reviewData
      */
     async tryToCreateReview(productAsin, reviewData) {
+        if (reviewData.id === undefined) {
+            log.warn('Tried to create product review without id', {
+                productAsin,
+                reviewData,
+            });
+
+            return;
+        }
+
         await ProductReview.transaction(async trx => {
             const exists = await ProductReview.query(trx)
                 .select(raw(1))
@@ -65,10 +74,15 @@ class ImportProductReviews {
             }
 
             try {
+                const date = formatISO9075(
+                    reviewData.date ?? new Date(),
+                    { representation: 'date' }
+                );
+
                 await ProductReview.query(trx)
                     .insert({
                         ...reviewData,
-                        date: formatISO9075(reviewData.date, { representation: 'date' }),
+                        date,
                         productAsin,
                     });
             } catch (e) {
@@ -76,6 +90,12 @@ class ImportProductReviews {
                     log.warn('Product review already exists, but surpassed the first check', {
                         productAsin,
                         reviewId: reviewData.id,
+                    });
+                } else if (e instanceof ValidationError) {
+                    log.info('Failed to create product review, given data is invalid', {
+                        productAsin,
+                        reviewData,
+                        err: e,
                     });
                 } else {
                     throw e;

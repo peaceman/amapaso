@@ -109,6 +109,32 @@ describe('import product reviews', () => {
         }
     });
 
+    it('doesnt crash the whole import process if some reviews are invalid or incomplete', async () => {
+        const productReviewFetcher = setupProductReviewFetcher();
+
+        productReviewFetcher.fetchReviews.mockImplementation(async function* () {
+            yield* [
+                {},
+                {id: 'foobar'},
+                ...reviewData,
+            ];
+        });
+
+        const importProductReviews = new ImportProductReviews(productReviewFetcher);
+        await importProductReviews.execute({
+            productAsin: product.asin,
+            productReviewImportId: productReviewImport.id,
+        });
+
+        for (const rd of reviewData) {
+            const review = await product.$relatedQuery('reviews')
+                .findOne({id: rd.id});
+
+            expect(review).toBeDefined();
+            expect(review).toMatchObject(rd);
+        }
+    });
+
     it('will mark the review import as started and stopped', async () => {
         const productReviewFetcher = setupProductReviewFetcher();
 
