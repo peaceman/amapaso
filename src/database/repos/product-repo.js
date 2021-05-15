@@ -7,7 +7,7 @@ class ProductRepo {
      * eligible products are products that have no reviews and where
      * the last import is older then 7 days
      * @param {{limit: number}} options
-     * @returns
+     * @returns {Array<Product>}
      */
     async fetchEligibleForReviewImport({ limit = 50 } = {}) {
         const products = await Product.query()
@@ -32,4 +32,4 @@ class ProductRepo {
 
 module.exports = {
     ProductRepo,
-}
+};

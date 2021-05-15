@@ -1,5 +1,6 @@
 const { Model } = require('objection');
 const BaseModel = require('./BaseModel');
+const ProductReviewImport = require('./ProductReviewImport');
 
 class Product extends BaseModel {
     static get tableName() {
@@ -75,6 +76,16 @@ class Product extends BaseModel {
                 },
             },
         };
+    }
+
+    /**
+     * @returns {ProductReviewImport}
+     */
+    async createQueuedReviewImport() {
+        return await this.$relatedQuery('reviewImports')
+            .insertAndFetch({
+                queuedAt: new Date().toISOString(),
+            });
     }
 }
 

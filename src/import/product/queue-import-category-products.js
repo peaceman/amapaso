@@ -48,7 +48,7 @@ class QueueImportCategoryProducts {
             const jobData = { categoryId: category.id, categoryProductImportId: productImport.id};
 
             await this.queue.add('import-category-products', jobData);
-            log.info('Queued import-category-products', );
+            log.info('Queued import-category-products', jobData);
         }
     }
 
