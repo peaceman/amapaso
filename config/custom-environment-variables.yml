@@ -12,3 +12,8 @@ database:
 
 redis:
   connectionUrl: "REDIS_CONNECTION_URL"
+
+socksProxyManager:
+  ssh:
+    default:
+      agent: "SSH_AUTH_SOCK"

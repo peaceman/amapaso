@@ -20,3 +20,16 @@ database:
 
 redis:
   connectionUrl: undefined
+
+socksProxyManager:
+  socks:
+    listen:
+      host: 127.0.0.1
+    auth:
+      username: socks-user
+      password: foobar
+
+  ssh:
+    default:
+      username: root
+    connections: []
