@@ -55,7 +55,7 @@ function createWorker() {
 async function addScheduledJobs(queue) {
     await queue.add(JOBS.QUEUE_IMPORT_CATEGORY_PRODUCTS, {}, {
         repeat: {
-            every: 3 * 60 * 1000,
+            every: 2 * 60 * 1000,
         },
     });
 }
