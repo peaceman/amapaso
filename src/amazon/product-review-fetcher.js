@@ -4,6 +4,8 @@ const log = require('../log');
 const { parse } = require('date-fns');
 const de = require('date-fns/locale/de');
 const pRetry = require('p-retry');
+const { SocksProxyManagerClient } = require('../socks-proxy-manager/client');
+const mergeConfig = require('axios/lib/core/mergeConfig');
 
 /**
  * @typedef {Object} ProductReviewData
@@ -107,19 +109,45 @@ class BotDetectionError extends Error {
 class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
     /**
      * @param {axios.AxiosInstance} axios
+     * @param {SocksProxyManagerClient} proxyManagerClient
      */
-     constructor(axios) {
-        /** @type {axios.AxiosInstance} */
-        this.axios = axios;
+     constructor(axios, proxyManagerClient) {
+        super(axios);
+
+        /** @type {SocksProxyManagerClient} */
+        this.proxyManagerClient = proxyManagerClient;
     }
 
     /**
-     * @param {string} productAsin
-     * @param {FetchReviewOptions} options
-     * @yields {ProductReviewData}
+     * @param {string} url
+     * @returns {string}
      */
-    async * fetchReviews(productAsin, { max = 10 } = {}) {
-        yield* [];
+     async loadPageHtml(url) {
+        const previousAxios = this.axios;
+        const agents = await this.proxyManagerClient.getNextHttpAgents();
+        if (agents === undefined) {
+            throw new MissingHttpAgentsError();
+        }
+
+        this.axios = axios.create(mergeConfig(previousAxios.defaults, agents));
+
+        try {
+            return await super.loadPageHtml(url);
+        } catch (e) {
+            if (e instanceof BotDetectionError) {
+                await this.proxyManagerClient.reportBlockedRequest(agents);
+            }
+
+            throw e;
+        } finally {
+            this.axios = previousAxios;
+        }
+    }
+}
+
+class MissingHttpAgentsError extends Error {
+    constructor() {
+        super('Missing http agents for next request');
     }
 }
 
