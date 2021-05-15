@@ -37,6 +37,7 @@ const { tap } = require('lodash');
 /**
  * @typedef {Object} SshOptions
  * @property {Array<SshConnectionConfig>} connections
+ * @property {SshConnectionConfig} default
  */
 
 /**
@@ -173,7 +174,10 @@ class SocksProxyManagerServer {
     async establishConnection(connectionInfo) {
         log.info('Establishing connection', {config: connectionInfo.config});
         const sshConnection = (connectionInfo.sshConnection = await openSshConnection(
-            connectionInfo.config
+            {
+                ...this.options.ssh.default,
+                ...connectionInfo.config,
+            }
         ));
 
         const socksServer = (connectionInfo.socksServer = await openSocksServer(
