@@ -11,7 +11,6 @@ class ProductReview extends BaseModel {
             type: 'object',
             required: [
                 'id',
-                'productAsin',
                 'name',
                 'title',
                 'content',
