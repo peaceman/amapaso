@@ -6,9 +6,14 @@ const log = require('../../log');
  * @param {import("./server").SocksAuthOptions} auth
  */
 function openSocksServer(host, auth) {
+    const isAuthConfigured = auth.username !== undefined && auth.password !== undefined;
+
     const server = new socks.Server({
         auths: [
-            socks.auth.UserPassword((u, p, cb) => cb(u === auth.username && p === auth.password)),
+            isAuthConfigured
+                ? socks.auth.UserPassword((u, p, cb) =>
+                    cb(u === auth.username && p === auth.password))
+                : socks.auth.None(),
         ],
     });
 
