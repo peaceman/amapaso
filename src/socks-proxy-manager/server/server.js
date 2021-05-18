@@ -318,7 +318,10 @@ function setupSocksSshForward(socksServer, sshConnection) {
 
                     clientSocket.destroy();
                 });
+
                 if (clientSocket) {
+                    socksRecordSockets(socksServer, clientSocket);
+
                     stream.pipe(clientSocket).pipe(stream);
                 } else {
                     deny();
@@ -345,7 +348,7 @@ async function cleanupConnectionResources(connectionInfo) {
 
    if (connectionInfo.socksServer) {
        log.info('Closing socks server', logCtx);
-       connectionInfo.socksServer.close();
+       socksStop(connectionInfo.socksServer);
        delete connectionInfo.socksServer;
    }
 
@@ -356,6 +359,29 @@ async function cleanupConnectionResources(connectionInfo) {
    }
 
    await Promise.allSettled(closePromises);
+}
+
+const OPEN_SOCKETS = Symbol('open-sockets');
+
+function socksRecordSockets(socksServer, clientSocket) {
+    if (!(OPEN_SOCKETS in socksServer)) {
+        socksServer[OPEN_SOCKETS] = new Set();
+    }
+
+    socksServer[OPEN_SOCKETS].add(clientSocket);
+
+    clientSocket.once(
+        'close',
+        () => socksServer[OPEN_SOCKETS].delete(clientSocket)
+    );
+}
+
+function socksStop(socksServer) {
+    for (const s of socksServer[OPEN_SOCKETS].values()) {
+        s.destroy();
+    }
+
+    socksServer.close();
 }
 
 module.exports = {
