@@ -311,6 +311,13 @@ function setupSocksSshForward(socksServer, sshConnection) {
                 }
 
                 const clientSocket = accept(true);
+                clientSocket.on('error', e => {
+                    log.warn('ClientSocket error', {
+                        err: e,
+                    });
+
+                    clientSocket.destroy();
+                });
                 if (clientSocket) {
                     stream.pipe(clientSocket).pipe(stream);
                 } else {
