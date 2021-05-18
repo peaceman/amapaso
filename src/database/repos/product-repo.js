@@ -24,6 +24,7 @@ class ProductRepo {
                 this.whereNull('pri.id')
                     .orWhere('pri.queued_at', '<', subDays(new Date(), 7))
             })
+            .whereNull('parent_asin')
             .limit(limit);
 
         return products;

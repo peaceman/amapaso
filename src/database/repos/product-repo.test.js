@@ -79,6 +79,15 @@ describe('product repo integration tests', () => {
                 expect(products).toHaveLength(0);
         });
 
+        it('doesnt fetch products with parent asin', async () => {
+            const parent = await createProduct({ asin: '0123456789'});
+            await product.$query().patch({ parentAsin: parent.asin });
+
+            const products = await productRepo.fetchEligibleForReviewImport({ limit: 1 });
+            expect(products).toHaveLength(1);
+            expect(products).toContainEqual(parent);
+        });
+
         async function createProduct({ asin = '1234567890' } = {}) {
             return await Product.query()
                 .insertAndFetch({
