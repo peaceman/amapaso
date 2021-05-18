@@ -1,22 +1,27 @@
 const fs = require('fs');
-const { ProductReviewFetcher, ProxyAwareProductReviewFetcher } = require("./product-review-fetcher");
+const { ProductReviewFetcher, ProxyAwareProductReviewFetcher, productReviewUrl } = require("./product-review-fetcher");
 const { unrollAsyncIterator } = require('../utils');
 const axios = require('axios');
 jest.mock('axios');
 
+const curlOptionsExpect = expect.objectContaining({httpHeader: expect.any(Array)});
+
 describe('product review fetcher', () => {
     it('fetches reviews', async () => {
         const asin = '1234567890';
-        const axios = setupAxios();
-        axios.get.mockReturnValueOnce({
+        const curly = setupCurly();
+        curly.get.mockReturnValueOnce({
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProductReviewFetcher(axios);
+        const fetcher = new ProductReviewFetcher(curly);
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin));
 
-        expect(axios.get)
-            .toBeCalledWith(`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`);
+        expect(curly.get)
+            .toBeCalledWith(
+                productReviewUrl(asin, 1),
+                curlOptionsExpect
+            );
 
         expect(reviews).not.toHaveLength(0);
         expect(reviews).toContainEqual({
@@ -31,7 +36,7 @@ describe('product review fetcher', () => {
 
     it('fetches reviews from multiple pages until the max option is reached', async () => {
         const asin = '1234567890';
-        const axios = setupAxios();
+        const axios = setupCurly();
         axios.get.mockReturnValue({
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
@@ -39,10 +44,11 @@ describe('product review fetcher', () => {
         const fetcher = new ProductReviewFetcher(axios);
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 25 }));
 
+
         expect(axios.get.mock.calls).toEqual([
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=2`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=3`],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
+            [productReviewUrl(asin, 2), curlOptionsExpect],
+            [productReviewUrl(asin, 3), curlOptionsExpect],
         ]);
 
         expect(reviews).toHaveLength(25);
@@ -50,7 +56,7 @@ describe('product review fetcher', () => {
 
     it('retries failed requests', async () => {
         const asin = '1234567890';
-        const axios = setupAxios();
+        const axios = setupCurly();
         axios.get.mockImplementationOnce(() => {
             throw new Error('hi');
         });
@@ -63,8 +69,8 @@ describe('product review fetcher', () => {
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
 
         expect(axios.get.mock.calls).toEqual([
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
         ]);
 
         expect(reviews).toHaveLength(5);
@@ -72,7 +78,7 @@ describe('product review fetcher', () => {
 
     it('detects captcha', async () => {
         const asin = '1234567890';
-        const axios = setupAxios();
+        const axios = setupCurly();
         axios.get.mockReturnValueOnce({
             data: fs.readFileSync('fixtures/amazon/bot.html').toString(),
         });
@@ -85,8 +91,8 @@ describe('product review fetcher', () => {
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
 
         expect(axios.get.mock.calls).toEqual([
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
         ]);
 
         expect(reviews).toHaveLength(5);
@@ -98,17 +104,17 @@ describe('product review fetcher', () => {
 describe('proxy aware product review fetcher', () => {
     it('rotates proxies', async () => {
         const asin = '1234567890';
-        const httpClient = setupAxios();
+        const httpClient = setupCurly();
         const proxyManagerClient = setupProxyManagerClient();
+        const limiter = setupLimiter();
         const agents = [
-            {headers: {foo: 'a'}},
-            {headers: {foo: 'b'}},
-            {headers: {foo: 'c'}},
+            {auth: {}, listen: {host: 'a', port: 22}},
+            {auth: {}, listen: {host: 'b', port: 22}},
+            {auth: {}, listen: {host: 'c', port: 22}},
         ];
 
         for (const agent of agents) {
-            proxyManagerClient.getNextHttpAgents.mockReturnValueOnce(agent);
-            axios.create.mockReturnValueOnce(httpClient);
+            proxyManagerClient.getNextSocksConnectionInfo.mockReturnValueOnce(agent);
         }
 
         httpClient.defaults = {headers: {foo: 'default'}};
@@ -116,19 +122,30 @@ describe('proxy aware product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProxyAwareProductReviewFetcher(httpClient, proxyManagerClient);
+        const fetcher = new ProxyAwareProductReviewFetcher(
+            httpClient,
+            [],
+            proxyManagerClient,
+            limiter
+        );
+
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 25 }));
 
         expect(httpClient.get.mock.calls).toEqual([
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=2`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=3`],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
+            [productReviewUrl(asin, 2), curlOptionsExpect],
+            [productReviewUrl(asin, 3), curlOptionsExpect],
         ]);
 
-        expect(proxyManagerClient.getNextHttpAgents).toBeCalledTimes(3);
+        expect(proxyManagerClient.getNextSocksConnectionInfo).toBeCalledTimes(3);
 
         for (const agent of agents) {
-            expect(axios.create).toBeCalledWith(agent);
+            expect(httpClient.get).toBeCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    proxy: `socks5://${agent.listen.host}:${agent.listen.port}`,
+                }),
+            );
         }
 
         expect(reviews).toHaveLength(25);
@@ -136,16 +153,16 @@ describe('proxy aware product review fetcher', () => {
 
     it('penalizes proxies on bot detection', async () => {
         const asin = '1234567890';
-        const httpClient = setupAxios();
+        const httpClient = setupCurly();
         const proxyManagerClient = setupProxyManagerClient();
+        const limiter = setupLimiter();
         const agents = [
-            {headers: {foo: 'a'}},
-            {headers: {foo: 'b'}},
+            {auth: {}, listen: {host: 'a'}},
+            {auth: {}, listen: {host: 'b'}},
         ];
 
         for (const agent of agents) {
-            proxyManagerClient.getNextHttpAgents.mockReturnValueOnce(agent);
-            axios.create.mockReturnValueOnce(httpClient);
+            proxyManagerClient.getNextSocksConnectionInfo.mockReturnValueOnce(agent);
         }
 
         httpClient.defaults = {headers: {foo: 'default'}};
@@ -157,33 +174,40 @@ describe('proxy aware product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProxyAwareProductReviewFetcher(httpClient, proxyManagerClient);
+        const fetcher = new ProxyAwareProductReviewFetcher(
+            httpClient,
+            [],
+            proxyManagerClient,
+            limiter
+        );
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
 
         expect(httpClient.get.mock.calls).toEqual([
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
-            [`https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=1`],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
+            [productReviewUrl(asin, 1), curlOptionsExpect],
         ]);
 
-        expect(proxyManagerClient.getNextHttpAgents).toBeCalledTimes(2);
+        expect(proxyManagerClient.getNextSocksConnectionInfo).toBeCalledTimes(2);
         expect(proxyManagerClient.reportBlockedRequest).toBeCalledWith(agents[0]);
-
-        for (const agent of agents) {
-            expect(axios.create).toBeCalledWith(agent);
-        }
 
         expect(reviews).toHaveLength(5);
     });
 
     function setupProxyManagerClient() {
         return {
-            getNextHttpAgents: jest.fn(),
+            getNextSocksConnectionInfo: jest.fn(),
             reportBlockedRequest: jest.fn(),
+        };
+    }
+
+    function setupLimiter() {
+        return {
+            schedule: jest.fn(),
         };
     }
 });
 
-function setupAxios() {
+function setupCurly() {
     return {
         get: jest.fn(),
     };

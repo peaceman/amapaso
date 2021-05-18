@@ -22,6 +22,7 @@
     "knex": "^0.21.19",
     "lodash": "^4.17.21",
     "mysql2": "^2.2.5",
+    "node-libcurl": "^2.3.3",
     "objection": "^2.2.15",
     "p-retry": "^4.5.0",
     "paapi5-nodejs-sdk": "^1.1.0",

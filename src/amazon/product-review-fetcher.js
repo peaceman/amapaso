@@ -1,11 +1,11 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
 const log = require('../log');
 const { parse } = require('date-fns');
 const de = require('date-fns/locale/de');
 const pRetry = require('p-retry');
 const { SocksProxyManagerClient } = require('../socks-proxy-manager/client');
-const mergeConfig = require('axios/lib/core/mergeConfig');
+const Bottleneck = require('bottleneck');
+const { curly } = require('node-libcurl');
 
 /**
  * @typedef {Object} ProductReviewData
@@ -24,11 +24,13 @@ const mergeConfig = require('axios/lib/core/mergeConfig');
 
 class ProductReviewFetcher {
     /**
-     * @param {axios.AxiosInstance} axios
+     * @param {curly} curly
      */
-    constructor(axios) {
-        /** @type {axios.AxiosInstance} */
-        this.axios = axios;
+    constructor(curly, headers = []) {
+        /** @type {curly} */
+        this.curly = curly;
+        /** @type {} */
+        this.headers = headers;
     }
 
     /**
@@ -60,10 +62,17 @@ class ProductReviewFetcher {
      * @returns {Array<ProductReviewData>}
      */
     async fetchReviewsFromPage(productAsin, pageNr) {
+        log.info('Fetch reviews from page', {
+            productAsin,
+            pageNr,
+        });
+
         const url = productReviewUrl(productAsin, pageNr);
 
         const html = await pRetry(
-            () => this.loadPageHtml(url),
+            () => this.loadPageHtml(url, {
+                httpHeader: [`Referer: ${productUrl(productAsin)}`],
+            }),
             {
                 onFailedAttempt: error => {
                     log.warn('Failed to load product review page', {
@@ -74,6 +83,8 @@ class ProductReviewFetcher {
                 }
             }
         );
+
+        log.info('Loaded product review page', {productAsin, pageNr});
 
         const $ = cheerio.load(html);
         const reviewEls = $('div[data-hook="review"]');
@@ -86,66 +97,97 @@ class ProductReviewFetcher {
 
     /**
      * @param {string} url
+     * @param {Object} curlOptions
      * @returns {string}
      */
-    async loadPageHtml(url) {
-        const response = await this.axios.get(url);
-        const html = response.data;
+    async loadPageHtml(url, curlOptions = {}) {
+        log.info('Load product review page', {
+            url,
+        });
 
-        if (html.includes('errors/validateCaptcha')) {
-            throw new BotDetectionError();
+        const options = {
+            ...curlOptions,
+            httpHeader: this.getRandomBrowserHeaders().concat(curlOptions.httpHeader || []),
+            acceptEncoding: '', // accept all encodings that curl supports
+        };
+
+        const { statusCode, data, headers } = await this.curly.get(url, options);
+
+        if (data.includes('errors/validateCaptcha')) {
+            throw new BotDetectionError(options);
         }
 
-        return html;
+        return data;
+    }
+
+    getRandomBrowserHeaders() {
+        if (this.headers.length === 0)
+            return [];
+
+        return this.headers[Math.floor(Math.random() * this.headers.length)];
     }
 }
 
 class BotDetectionError extends Error {
-    constructor() {
-        super('Bot detected')
+    constructor(curlOptions) {
+        super('Bot detected');
+
+        this.curlOptions = curlOptions;
     }
 }
 
 class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
     /**
-     * @param {axios.AxiosInstance} axios
+     * @param {curly} curly
+     * @param {Array<Array<String>>} headers
      * @param {SocksProxyManagerClient} proxyManagerClient
+     * @param {Bottleneck} limiter
      */
-     constructor(axios, proxyManagerClient) {
-        super(axios);
+     constructor(curly, headers, proxyManagerClient, limiter) {
+        super(curly, headers);
 
         /** @type {SocksProxyManagerClient} */
         this.proxyManagerClient = proxyManagerClient;
+
+        /** @type {Bottleneck} */
+        this.limiter = limiter;
     }
 
     /**
      * @param {string} url
+     * @param {Object} curlOptions
      * @returns {string}
      */
-     async loadPageHtml(url) {
-        const previousAxios = this.axios;
-        const agents = await this.proxyManagerClient.getNextHttpAgents();
-        if (agents === undefined) {
-            throw new MissingHttpAgentsError();
+     async loadPageHtml(url, curlOptions = {}) {
+        await this.limiter.schedule(() => ({}));
+        const sci = await this.proxyManagerClient.getNextSocksConnectionInfo();
+
+        const curlProxyAuthOptions = sci.auth.username !== undefined && sci.auth.password !== undefined
+            ? { proxyUsername: sci.auth.username, proxyPassword: sci.auth.password }
+            : {};
+
+        if (sci === undefined) {
+            throw new MissingSocksConnectionInfoError();
         }
 
-        this.axios = axios.create(mergeConfig(previousAxios.defaults, agents));
-
         try {
-            return await super.loadPageHtml(url);
+            return await super.loadPageHtml(url, {
+                proxy: `socks5://${sci.listen.host}:${sci.listen.port}`,
+                ...curlProxyAuthOptions,
+                ...curlOptions,
+            });
         } catch (e) {
             if (e instanceof BotDetectionError) {
-                await this.proxyManagerClient.reportBlockedRequest(agents);
+                log.warn('Bot detection error', {err: e});
+                await this.proxyManagerClient.reportBlockedRequest(sci);
             }
 
             throw e;
-        } finally {
-            this.axios = previousAxios;
         }
     }
 }
 
-class MissingHttpAgentsError extends Error {
+class MissingSocksConnectionInfoError extends Error {
     constructor() {
         super('Missing http agents for next request');
     }
@@ -156,7 +198,11 @@ class MissingHttpAgentsError extends Error {
  * @param {number} pageNr
  */
 function productReviewUrl(asin, pageNr) {
-    return `https://www.amazon.de/product-reviews/${asin}/?ie=UTF8&pageNumber=${pageNr}`;
+    return `https://www.amazon.de/product-reviews/${asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&pageNumber=${pageNr}&reviewerType=all_reviews`;
+}
+
+function productUrl(asin) {
+    return `https://www.amazon.de/dp/${asin}`;
 }
 
 /**
@@ -229,6 +275,7 @@ function parseReviewContent(content) {
 }
 
 module.exports = {
+    productReviewUrl,
     ProductReviewFetcher,
     ProxyAwareProductReviewFetcher,
 };
