@@ -11,7 +11,7 @@ describe('socks proxy manager client', () => {
     const socksAuthOptions = {username: 'foo', password: 'bar'};
     const clientOptions = {auth: socksAuthOptions};
 
-    it('fetches http agents', async () => {
+    it('fetches socks connection infos', async () => {
         const storage = setupStorage();
         const listen = {host: 'foobar', port: 23};
         storage.getLRUConnection.mockReturnValueOnce({
@@ -20,22 +20,13 @@ describe('socks proxy manager client', () => {
         });
 
         const client = new SocksProxyManagerClient(clientOptions, storage);
-        const agents = await client.getNextHttpAgents();
+        const sci = await client.getNextSocksConnectionInfo();
 
-        expect(agents).toBeDefined();
-        expect(agents).toMatchObject({
-            httpAgent: expect.any(SocksProxyAgent),
-            httpsAgent: expect.any(SocksProxyAgent),
+        expect(sci).toBeDefined();
+        expect(sci).toMatchObject({
+            listen,
+            auth: socksAuthOptions,
         });
-
-        const socksConfig = {
-            ...listen,
-            userId: socksAuthOptions.username,
-            password: socksAuthOptions.password,
-        };
-
-        expect(SocksProxyAgent).toHaveBeenCalledWith(socksConfig);
-        expect(SocksProxyAgent).toHaveBeenCalledWith(socksConfig);
     });
 
     it('will return undefined if the storage doesnt have a connection', async () => {
@@ -43,9 +34,9 @@ describe('socks proxy manager client', () => {
         storage.getLRUConnection.mockReturnValueOnce(undefined);
 
         const client = new SocksProxyManagerClient(clientOptions, storage);
-        const agents = await client.getNextHttpAgents();
+        const sci = await client.getNextSocksConnectionInfo();
 
-        expect(agents).not.toBeDefined();
+        expect(sci).not.toBeDefined();
     });
 
     it('report blocked requests will be applied to the correct connection', async () => {
@@ -56,8 +47,8 @@ describe('socks proxy manager client', () => {
         });
 
         const client = new SocksProxyManagerClient(clientOptions, storage);
-        const agents = await client.getNextHttpAgents();
-        await client.reportBlockedRequest(agents);
+        const sci = await client.getNextSocksConnectionInfo();
+        await client.reportBlockedRequest(sci);
 
         expect(storage.penalizeConnection).toHaveBeenCalledWith('cch');
     });

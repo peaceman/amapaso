@@ -4,11 +4,18 @@ const { SocksProxyAgent } = require('socks-proxy-agent');
 const CONNECTION_CONFIG_HASH = Symbol('listener identifier');
 
 /**
+ * @typedef {Object} SocksConnectionInfo
+ * @property {import("./server/server").SocksListenOptions} listen
+ * @property {import('./server/server').SocksAuthOptions} auth
+ */
+
+/**
  * @typedef {Object} SocksProxyManagerClientOptions
  * @property {import('./server/server').SocksAuthOptions} auth
  */
 class SocksProxyManagerClient {
     /**
+     * @param {SocksProxyManagerClientOptions} options
      * @param {import('./storage').Storage} storage
      */
     constructor(options, storage) {
@@ -18,22 +25,20 @@ class SocksProxyManagerClient {
         this.storage = storage;
     }
 
-    async getNextHttpAgents() {
+    /**
+     * @returns {SocksConnectionInfo}
+     */
+    async getNextSocksConnectionInfo() {
+        log.info('Fetch next socks connection info from storage');
         const socksConnection = await this.storage.getLRUConnection();
         if (!socksConnection) {
             log.warn("Didn't get a socks connection from storage");
             return;
         }
 
-        const agent = new SocksProxyAgent({
-            ...socksConnection.listen,
-            userId: this.options.auth.username,
-            password: this.options.auth.password,
-        });
-
         return {
-            httpAgent: agent,
-            httpsAgent: agent,
+            listen: socksConnection.listen,
+            auth: this.options.auth,
             [CONNECTION_CONFIG_HASH]: socksConnection.connectionConfigHash,
         };
     }
@@ -41,7 +46,7 @@ class SocksProxyManagerClient {
     async reportBlockedRequest(agents) {
         const connectionConfigHash = agents[CONNECTION_CONFIG_HASH];
         if (!connectionConfigHash) {
-            log.debug("Couldn't extract connection config hash from given agents");
+            log.debug("Couldn't extract connection config hash from given socks connection info");
             return;
         }
 
