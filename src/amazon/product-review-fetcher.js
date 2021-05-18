@@ -192,8 +192,7 @@ function parseReviewRating(rating, { defaultRating = 1 } = {}) {
  * @returns {Date}
  */
 function parseReviewDate(string) {
-    const match = string.match(/.+vom\s(.+)$/);
-    // const date = new Date(match === null ? undefined : match[1]);
+    const match = string.match(/.+(?:vom|am)\s(.+)$/);
     const date = parse(
         match === null ? undefined : match[1],
         'd. MMMM y',
