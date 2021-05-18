@@ -1,6 +1,7 @@
 const log = require('../../log');
 const { ProductRepo } = require('../../database/repos/product-repo');
 const { Queue } = require('bullmq');
+const { JOBS } = require('../../queueing/meta');
 
 class QueueImportProductReviews {
     /**
@@ -29,7 +30,7 @@ class QueueImportProductReviews {
             /** @type {import('./import-product-reviews').ImportProductReviewsRequest} */
             const jobData = {productAsin: product.asin, productReviewImportId: reviewImport.id};
 
-            await this.queue.add('import-product-reviews', jobData);
+            await this.queue.add(JOBS.IMPORT_PRODUCT_REVIEWS, jobData);
             log.info('Queued import-product-reviews', jobData);
         }
     }

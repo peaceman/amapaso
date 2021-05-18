@@ -312,7 +312,7 @@ function setupSocksSshForward(socksServer, sshConnection) {
 
                 const clientSocket = accept(true);
                 clientSocket.on('error', e => {
-                    log.warn('ClientSocket error', {
+                    log.debug('ClientSocket error', {
                         err: e,
                     });
 
@@ -377,7 +377,7 @@ function socksRecordSockets(socksServer, clientSocket) {
 }
 
 function socksStop(socksServer) {
-    for (const s of socksServer[OPEN_SOCKETS].values()) {
+    for (const s of (socksServer[OPEN_SOCKETS]?.values() ?? [])) {
         s.destroy();
     }
 

@@ -58,6 +58,12 @@ async function addScheduledJobs(queue) {
             every: 2 * 60 * 1000,
         },
     });
+
+    await queue.add(JOBS.QUEUE_IMPORT_PRODUCT_REVIEWS, {}, {
+        repeat: {
+            every: 30 * 1000,
+        },
+    });
 }
 
 /**
@@ -72,6 +78,12 @@ async function workerProcess(job) {
             break;
         case JOBS.IMPORT_CATEGORY_PRODUCTS:
             await handleImportCategoryProducts(job);
+            break;
+        case JOBS.QUEUE_IMPORT_PRODUCT_REVIEWS:
+            await handleQueueImportProductReviews(job);
+            break;
+        case JOBS.IMPORT_PRODUCT_REVIEWS:
+            await handleImportProductReviews(job);
             break;
         default:
             log.warn('Worker received a job but has no handler for it', {job: {
@@ -94,6 +106,22 @@ async function handleQueueImportCategoryProducts(job) {
 async function handleImportCategoryProducts(job) {
     const { importCategoryProducts } = require('../import/product');
     await importCategoryProducts.execute(job.data);
+}
+
+/**
+ * @param {Job} job
+ */
+async function handleQueueImportProductReviews(job) {
+    const { queueImportProductReviews } = require('../import/product');
+    await queueImportProductReviews.execute();
+}
+
+/**
+ * @param {Job} job
+ */
+async function handleImportProductReviews(job) {
+    const { importProductReviews } = require('../import/product');
+    await importProductReviews.execute(job.data);
 }
 
 module.exports = {

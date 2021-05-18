@@ -25,11 +25,33 @@ socksProxyManager:
   socks:
     listen:
       host: 127.0.0.1
-    auth:
-      username: socks-user
-      password: foobar
+    auth: {}
+      # username: socks-user
+      # password: foobar
 
   ssh:
     default:
       username: root
     connections: []
+
+browserHeaders:
+  -
+    - 'Connection: keep-alive'
+    - 'Cache-Control: no-cache'
+    - 'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"'
+    - 'sec-ch-ua-mobile: ?0'
+    - 'Upgrade-Insecure-Requests: 1'
+    - 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
+    - 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+    - 'Sec-Fetch-Site: none'
+    - 'Sec-Fetch-Mode: navigate'
+    - 'Sec-Fetch-User: ?1'
+    - 'Sec-Fetch-Dest: document'
+    - 'Accept-Language: en-US,en;q=0.9,de;q=0.8'
+
+  -
+    - 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:88.0) Gecko/20100101 Firefox/88.0'
+    - 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+    - 'Accept-Language: en-US,en;q=0.5'
+    - 'Connection: keep-alive'
+    - 'Upgrade-Insecure-Requests: 1'
