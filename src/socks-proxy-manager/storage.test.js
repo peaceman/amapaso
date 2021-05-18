@@ -315,7 +315,7 @@ describe('storage', () => {
                 `spm:connections`,
                 'XX',
                 'INCR',
-                10 * 1000,
+                100 * 1000,
                 connectionConfigHash
             );
     });

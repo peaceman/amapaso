@@ -103,6 +103,8 @@ class Storage {
                     continue;
                 }
 
+                log.info('LRU proxy', listenOptionsJson);
+
                 return {
                     listen: JSON.parse(listenOptionsJson),
                     connectionConfigHash,
@@ -137,7 +139,7 @@ class Storage {
             this.key('connections'),
             'XX',
             'INCR',
-            10 * 1000,
+            100 * 1000,
             connectionConfigHash
         );
     }
