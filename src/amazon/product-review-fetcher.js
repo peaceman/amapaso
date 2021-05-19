@@ -70,9 +70,7 @@ class ProductReviewFetcher {
         const url = productReviewUrl(productAsin, pageNr);
 
         const html = await pRetry(
-            () => this.loadPageHtml(url, {
-                httpHeader: [`Referer: ${productUrl(productAsin)}`],
-            }),
+            () => this.loadPageHtml(url),
             {
                 onFailedAttempt: error => {
                     log.warn('Failed to load product review page', {
@@ -106,7 +104,6 @@ class ProductReviewFetcher {
         });
 
         const browserHeaders = await this.getRandomBrowserHeaders();
-        log.info('Randomized browser headers', browserHeaders);
 
         const options = {
             ...curlOptions,
@@ -114,7 +111,6 @@ class ProductReviewFetcher {
             acceptEncoding: '', // accept all encodings that curl supports
         };
 
-        return '';
         const { statusCode, data, headers } = await this.curly.get(url, options);
 
         if (data.includes('errors/validateCaptcha')) {
