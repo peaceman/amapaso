@@ -117,7 +117,7 @@ class ProductReviewFetcher {
 
         const { statusCode, data, headers } = await this.curly.get(url, options);
 
-        if ('includes' in data && data.includes('errors/validateCaptcha')) {
+        if (data.includes('errors/validateCaptcha')) {
             throw new BotDetectionError(options);
         }
 
