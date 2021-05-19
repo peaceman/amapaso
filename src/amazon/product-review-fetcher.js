@@ -160,7 +160,7 @@ class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
      * @returns {string}
      */
      async loadPageHtml(url, curlOptions = {}) {
-        await this.limiter.schedule(() => ({}));
+        await this.limiter.schedule(() => randomizedDelay(500, 2500));
         const sci = await this.proxyManagerClient.getNextSocksConnectionInfo();
 
         const curlProxyAuthOptions = sci.auth.username !== undefined && sci.auth.password !== undefined
@@ -186,6 +186,17 @@ class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
             throw e;
         }
     }
+}
+
+async function randomizedDelay(min, max) {
+    async function sleep(delay) {
+        return new Promise(resolve => setTimeout(resolve, delay));
+    }
+
+    const diff = Math.max(0, max - min);
+    const delay = min + (Math.random() * diff);
+
+    return sleep(delay);
 }
 
 class MissingSocksConnectionInfoError extends Error {
