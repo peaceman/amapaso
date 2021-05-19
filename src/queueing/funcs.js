@@ -1,11 +1,16 @@
 const { Queue, QueueScheduler, Worker, Job } = require('bullmq');
+const Redis = require('ioredis');
 const config = require('config');
 const log = require('../log');
 const { QUEUE_NAME, JOBS} = require('./meta');
 
+function redisConnection() {
+    return new Redis(config.get('redis.connectionUrl'));
+}
+
 function createQueue() {
     const queue = new Queue(QUEUE_NAME, {
-        connection: config.get('redis.connectionUrl'),
+        connection: redisConnection(),
         defaultJobOptions: {
             removeOnComplete: 100,
             removeOnFail: 100,
@@ -20,7 +25,7 @@ function createQueue() {
 
 function createQueueScheduler() {
     const scheduler = new QueueScheduler(QUEUE_NAME, {
-        connection: config.get('redis.connectionUrl'),
+        connection: redisConnection(),
     });
 
     scheduler.waitUntilReady()
@@ -34,7 +39,7 @@ function createWorker() {
         QUEUE_NAME,
         workerProcess,
         {
-            connection: config.get('redis.connectionUrl'),
+            connection: redisConnection(),
             concurrency: 50,
         }
     );
