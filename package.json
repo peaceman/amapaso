@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
+    "browser-headers-generator": "^0.0.1",
     "bullmq": "^1.24.0",
     "bunyan": "^1.8.15",
     "cheerio": "*",

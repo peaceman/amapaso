@@ -14,6 +14,8 @@ const { Storage } = require('../../socks-proxy-manager/storage');
 const Redis = require('ioredis');
 const { default: Bottleneck } = require('bottleneck');
 const { curly } = require('node-libcurl');
+const BrowserHeadersGenerator = require('browser-headers-generator');
+const log = require('../../log');
 
 const queueImportCategoryProducts = new QueueImportCategoryProducts(
     categoryRepo,
@@ -31,10 +33,30 @@ const queueImportProductReviews = new QueueImportProductReviews(
     queue
 );
 
+const browserHeaderProvider = function () {
+    const generator = new BrowserHeadersGenerator();
+
+    return {
+        get: async () => {
+            if (!generator.initialized) {
+                log.info('Initialize browser headers generator');
+                await generator.initialize();
+            }
+
+            const headers = await generator.getRandomizedHeaders();
+
+            return Object.entries(headers)
+                .filter(([k, v]) => !k.includes('Accept-Encoding'))
+                .filter(([k, v]) => v !== undefined)
+                .map(([k, v]) => `${k}: ${v}`);
+        },
+    };
+};
+
 const importProductReviews = new ImportProductReviews(
     new ProxyAwareProductReviewFetcher(
         curly,
-        config.get('browserHeaders'),
+        browserHeaderProvider(),
         new SocksProxyManagerClient(
             config.get('socksProxyManager.socks'),
             new Storage(new Redis(config.get('redis.connectionUrl')))

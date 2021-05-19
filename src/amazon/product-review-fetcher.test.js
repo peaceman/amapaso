@@ -14,7 +14,7 @@ describe('product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProductReviewFetcher(curly);
+        const fetcher = new ProductReviewFetcher(curly, setupBrowserHeaderProvider());
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin));
 
         expect(curly.get)
@@ -41,9 +41,8 @@ describe('product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProductReviewFetcher(axios);
+        const fetcher = new ProductReviewFetcher(axios, setupBrowserHeaderProvider());
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 25 }));
-
 
         expect(axios.get.mock.calls).toEqual([
             [productReviewUrl(asin, 1), curlOptionsExpect],
@@ -65,7 +64,7 @@ describe('product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProductReviewFetcher(axios);
+        const fetcher = new ProductReviewFetcher(axios, setupBrowserHeaderProvider());
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
 
         expect(axios.get.mock.calls).toEqual([
@@ -87,7 +86,7 @@ describe('product review fetcher', () => {
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
-        const fetcher = new ProductReviewFetcher(axios);
+        const fetcher = new ProductReviewFetcher(axios, setupBrowserHeaderProvider());
         const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
 
         expect(axios.get.mock.calls).toEqual([
@@ -98,7 +97,30 @@ describe('product review fetcher', () => {
         expect(reviews).toHaveLength(5);
     });
 
+    it('uses browser header provider', async () => {
+        const asin = '1234567890';
+        const curly = setupCurly();
+        const headers = [
+            'Foo: bar',
+            'Bar: foo',
+        ];
+        const browserHeaderProvider = setupBrowserHeaderProvider();
+        browserHeaderProvider.get.mockReturnValue(headers);
 
+        curly.get.mockReturnValueOnce({ data: 'html' });
+
+        const fetcher = new ProductReviewFetcher(curly, browserHeaderProvider);
+        const reviews = await unrollAsyncIterator(fetcher.fetchReviews(asin, { max: 5 }));
+
+        expect(curly.get).toBeCalledWith(
+            productReviewUrl(asin, 1),
+            expect.objectContaining({
+                httpHeader: expect.arrayContaining(headers),
+            })
+        );
+
+        expect(browserHeaderProvider.get).toBeCalledTimes(1);
+    });
 });
 
 describe('proxy aware product review fetcher', () => {
@@ -117,14 +139,13 @@ describe('proxy aware product review fetcher', () => {
             proxyManagerClient.getNextSocksConnectionInfo.mockReturnValueOnce(agent);
         }
 
-        httpClient.defaults = {headers: {foo: 'default'}};
         httpClient.get.mockReturnValue({
             data: fs.readFileSync('fixtures/amazon/product-reviews.html').toString(),
         });
 
         const fetcher = new ProxyAwareProductReviewFetcher(
             httpClient,
-            [],
+            setupBrowserHeaderProvider(),
             proxyManagerClient,
             limiter
         );
@@ -176,7 +197,7 @@ describe('proxy aware product review fetcher', () => {
 
         const fetcher = new ProxyAwareProductReviewFetcher(
             httpClient,
-            [],
+            setupBrowserHeaderProvider(),
             proxyManagerClient,
             limiter
         );
@@ -210,5 +231,11 @@ describe('proxy aware product review fetcher', () => {
 function setupCurly() {
     return {
         get: jest.fn(),
+    };
+}
+
+function setupBrowserHeaderProvider() {
+    return {
+        get: jest.fn().mockReturnValue([]),
     };
 }

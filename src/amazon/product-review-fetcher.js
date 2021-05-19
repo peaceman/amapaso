@@ -26,11 +26,11 @@ class ProductReviewFetcher {
     /**
      * @param {curly} curly
      */
-    constructor(curly, headers = []) {
+    constructor(curly, browserHeaderProvider = []) {
         /** @type {curly} */
         this.curly = curly;
-        /** @type {} */
-        this.headers = headers;
+        /** @type {BrowserHeaderProvider} */
+        this.browserHeaderProvider = browserHeaderProvider;
     }
 
     /**
@@ -105,12 +105,16 @@ class ProductReviewFetcher {
             url,
         });
 
+        const browserHeaders = await this.getRandomBrowserHeaders();
+        log.info('Randomized browser headers', browserHeaders);
+
         const options = {
             ...curlOptions,
-            httpHeader: this.getRandomBrowserHeaders().concat(curlOptions.httpHeader || []),
+            httpHeader: browserHeaders.concat(curlOptions.httpHeader || []),
             acceptEncoding: '', // accept all encodings that curl supports
         };
 
+        return '';
         const { statusCode, data, headers } = await this.curly.get(url, options);
 
         if (data.includes('errors/validateCaptcha')) {
@@ -120,11 +124,8 @@ class ProductReviewFetcher {
         return data;
     }
 
-    getRandomBrowserHeaders() {
-        if (this.headers.length === 0)
-            return [];
-
-        return this.headers[Math.floor(Math.random() * this.headers.length)];
+    async getRandomBrowserHeaders() {
+        return await this.browserHeaderProvider.get();
     }
 }
 
