@@ -35,14 +35,19 @@ const queueImportProductReviews = new QueueImportProductReviews(
 
 const browserHeaderProvider = function () {
     const generator = new BrowserHeadersGenerator();
+    let initPromise;
 
     return {
         get: async () => {
-            if (!generator.initialized) {
+            if (!initPromise) {
+                initPromise = new Promise(resolve => {
                 log.info('Initialize browser headers generator');
-                await generator.initialize();
+                    generator.initialize()
+                        .then(() => resolve());
+                })
             }
 
+            await initPromise;
             const headers = await generator.getRandomizedHeaders();
 
             return Object.entries(headers)
