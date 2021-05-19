@@ -63,7 +63,7 @@ const importProductReviews = new ImportProductReviews(
         ),
         new Bottleneck({
             clearDatastore: true,
-            minTime: 333,
+            minTime: 500,
             datastore: 'ioredis',
             id: 'product-review-fetcher',
             clientOptions: config.get('redis.connectionUrl'),
