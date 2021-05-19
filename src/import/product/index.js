@@ -41,17 +41,25 @@ const browserHeaderProvider = function () {
         get: async () => {
             if (!initPromise) {
                 initPromise = new Promise(resolve => {
-                log.info('Initialize browser headers generator');
+                    log.info('Initialize browser headers generator');
                     generator.initialize()
                         .then(() => resolve());
                 })
             }
 
             await initPromise;
+
             const headers = await generator.getRandomizedHeaders();
+            const banned = [
+                'Accept-Encoding',
+                'Pragma',
+                'Cache-Control',
+                'Referer',
+                'Sec-',
+            ];
 
             return Object.entries(headers)
-                .filter(([k, v]) => !k.includes('Accept-Encoding'))
+                .filter(([k, v]) => banned.every(b => !k.includes(b)))
                 .filter(([k, v]) => v !== undefined)
                 .map(([k, v]) => `${k}: ${v}`);
         },
@@ -68,7 +76,8 @@ const importProductReviews = new ImportProductReviews(
         ),
         new Bottleneck({
             clearDatastore: true,
-            minTime: 500,
+            minTime: 1000,
+            maxConcurrent: 1,
             datastore: 'ioredis',
             id: 'product-review-fetcher',
             clientOptions: config.get('redis.connectionUrl'),
