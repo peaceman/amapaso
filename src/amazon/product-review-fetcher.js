@@ -25,8 +25,9 @@ const { curly } = require('node-libcurl');
 class ProductReviewFetcher {
     /**
      * @param {curly} curly
+     * @param {BrowserHeaderProvider} browserHeaderProvider
      */
-    constructor(curly, browserHeaderProvider = []) {
+    constructor(curly, browserHeaderProvider) {
         /** @type {curly} */
         this.curly = curly;
         /** @type {BrowserHeaderProvider} */
@@ -113,11 +114,10 @@ class ProductReviewFetcher {
             acceptEncoding: 'deflate, gzip', // accept all encodings that curl supports
         };
 
-        log.info('BrowserHeaders', options.httpHeader);
-
         const { statusCode, data, headers } = await this.curly.get(url, options);
 
         if (data.includes('errors/validateCaptcha')) {
+            log.warn('Bot detection error', {headers: options.httpHeader, url});
             throw new BotDetectionError(options);
         }
 
@@ -140,18 +140,22 @@ class BotDetectionError extends Error {
 class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
     /**
      * @param {curly} curly
-     * @param {Array<Array<String>>} headers
+     * @param {BrowserHeaderProvider} browserHeaderProvider
      * @param {SocksProxyManagerClient} proxyManagerClient
      * @param {Bottleneck} limiter
+     * @param {string} socksGatewayProxy
      */
-     constructor(curly, headers, proxyManagerClient, limiter) {
-        super(curly, headers);
+     constructor(curly, browserHeaderProvider, proxyManagerClient, limiter) {
+        super(curly, browserHeaderProvider);
 
         /** @type {SocksProxyManagerClient} */
         this.proxyManagerClient = proxyManagerClient;
 
         /** @type {Bottleneck} */
         this.limiter = limiter;
+
+        /** @type {string} */
+        this.socksGatewayProxy = socksGatewayProxy;
     }
 
     /**
@@ -162,24 +166,31 @@ class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
      async loadPageHtml(url, curlOptions = {}) {
         await this.limiter.schedule(() => randomizedDelay(500, 2500));
         const sci = await this.proxyManagerClient.getNextSocksConnectionInfo();
-
-        const curlProxyAuthOptions = sci.auth.username !== undefined && sci.auth.password !== undefined
-            ? { proxyUsername: sci.auth.username, proxyPassword: sci.auth.password }
-            : {};
-
         if (sci === undefined) {
             throw new MissingSocksConnectionInfoError();
         }
 
+        const socksProxyAuth = sci.auth.username !== undefined && sci.auth.password !== undefined
+            ? `${sci.auth.username}:${sci.auth.password}`
+            : undefined;
+        const socksProxyAddress = `${sci.listen.host}:${sci.listen.port}`;
+        const socksProxy = [socksProxyAuth, socksProxyAddress]
+            .filter(v => Boolean(v))
+            .join('@');
+
+        const httpHeader = [
+            `X-Proxy: socks5://${socksProxy}`,
+        ];
+
         try {
             return await super.loadPageHtml(url, {
-                proxy: `socks5://${sci.listen.host}:${sci.listen.port}`,
-                ...curlProxyAuthOptions,
+                proxy: this.socksGatewayProxy,
                 ...curlOptions,
+                sslVerifyPeer: false,
+                httpHeader: (curlOptions.httpHeader || []).concat(httpHeader)
             });
         } catch (e) {
             if (e instanceof BotDetectionError) {
-                log.warn('Bot detection error', {err: e});
                 await this.proxyManagerClient.reportBlockedRequest(sci);
             }
 

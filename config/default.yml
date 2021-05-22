@@ -43,6 +43,7 @@ queueing:
       every: 30
 
 productReviewFetcher:
+  socksGatewayProxy: "http://localhost:8080"
   rateLimiter:
     minTime: 2135
     maxConcurrent: 1

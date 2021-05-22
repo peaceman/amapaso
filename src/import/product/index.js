@@ -82,7 +82,8 @@ const importProductReviews = new ImportProductReviews(
             id: 'product-review-fetcher',
             clientOptions: config.get('redis.connectionUrl'),
             ...config.get('productReviewFetcher.rateLimiter')
-        })
+        }),
+        config.get('productReviewFetcher.socksGatewayProxy')
     )
 );
 
