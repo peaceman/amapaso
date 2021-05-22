@@ -84,7 +84,7 @@ class CategoryRepo {
         });
     }
 
-    async fetchEligibleForPeriodicProductsImport({ limit = 10, daysSinceLastQueueing = 7 } = {}) {
+    async fetchEligibleForPeriodicProductsImport({ limit = 25, daysSinceLastQueueing = 60 } = {}) {
         const categories = await Category.query()
             .leftJoin('category_product_imports as cip', 'cip.id', function () {
                 this.select('cipi.id')
