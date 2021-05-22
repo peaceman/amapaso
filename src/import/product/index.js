@@ -81,6 +81,7 @@ const importProductReviews = new ImportProductReviews(
             datastore: 'ioredis',
             id: 'product-review-fetcher',
             clientOptions: config.get('redis.connectionUrl'),
+            ...config.get('productReviewFetcher.rateLimiter')
         })
     )
 );

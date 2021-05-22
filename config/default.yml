@@ -41,3 +41,8 @@ queueing:
   importProductReviews:
     repeat:
       every: 30
+
+productReviewFetcher:
+  rateLimiter:
+    minTime: 2135
+    maxConcurrent: 1
