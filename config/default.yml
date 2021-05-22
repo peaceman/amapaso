@@ -37,10 +37,10 @@ socksProxyManager:
 queueing:
   importCategoryProducts:
     repeat:
-      every: 120
+      every: 120000
   importProductReviews:
     repeat:
-      every: 30
+      every: 30000
 
 productReviewFetcher:
   socksGatewayProxy: "http://localhost:8080"
