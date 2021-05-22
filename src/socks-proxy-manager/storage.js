@@ -1,4 +1,5 @@
 const log = require("../log");
+const { Mutex } = require('async-mutex');
 
 /**
  * SortedSet at spm:connections : timestamp of last use -> connection config hash
@@ -9,6 +10,7 @@ class Storage {
     constructor(redis, {listenerExpiry = 10} = {}) {
         this.listenerExpiry = listenerExpiry;
         this.redis = redis;
+        this.mutex = new Mutex();
     }
 
     /**
@@ -62,7 +64,11 @@ class Storage {
      * @returns {{listen: import("./server/server").SocksListenOptions, connectionConfigHash: string}|undefined}
      */
     async getLRUConnection() {
+        let release;
+
         try {
+            release = await this.mutex.acquire();
+
             while (true) {
                 const [connectionConfigHash] = await this.redis.zrange(this.key('connections'), 0, 1);
                 if (connectionConfigHash === undefined) return;
@@ -113,6 +119,10 @@ class Storage {
         } catch (e) {
             log.error('An error occurred during get lru connection', {err: e});
             return undefined;
+        } finally {
+            if (release) {
+                release();
+            }
         }
     }
 
