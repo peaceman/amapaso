@@ -145,7 +145,7 @@ class ProxyAwareProductReviewFetcher extends ProductReviewFetcher {
      * @param {Bottleneck} limiter
      * @param {string} socksGatewayProxy
      */
-     constructor(curly, browserHeaderProvider, proxyManagerClient, limiter) {
+     constructor(curly, browserHeaderProvider, proxyManagerClient, limiter, socksGatewayProxy) {
         super(curly, browserHeaderProvider);
 
         /** @type {SocksProxyManagerClient} */
