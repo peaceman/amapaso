@@ -58,17 +58,24 @@ function createWorker() {
  * @param {Queue} queue
  */
 async function addScheduledJobs(queue) {
-    await queue.add(JOBS.QUEUE_IMPORT_CATEGORY_PRODUCTS, {}, {
-        repeat: {
-            every: 2 * 60 * 1000,
-        },
-    });
+    await scheduleImportCategoryProducts(queue);
+    await scheduleImportProductReviews(queue);
+}
 
-    await queue.add(JOBS.QUEUE_IMPORT_PRODUCT_REVIEWS, {}, {
-        repeat: {
-            every: 30 * 1000,
-        },
-    });
+/**
+ * @param {Queue} queue
+ */
+async function scheduleImportCategoryProducts(queue) {
+    const options = config.get('queueing.importCategoryProducts');
+    await queue.add(JOBS.QUEUE_IMPORT_CATEGORY_PRODUCTS, {}, options);
+}
+
+/**
+ * @param {Queue} queue
+ */
+async function scheduleImportProductReviews(queue) {
+    const options = config.get('queueing.importProductReviews');
+    await queue.add(JOBS.QUEUE_IMPORT_PRODUCT_REVIEWS, {}, options);
 }
 
 /**

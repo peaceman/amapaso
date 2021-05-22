@@ -33,3 +33,11 @@ socksProxyManager:
     default:
       username: root
     connections: []
+
+queueing:
+  importCategoryProducts:
+    repeat:
+      every: 120
+  importProductReviews:
+    repeat:
+      every: 30
